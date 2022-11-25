@@ -1,0 +1,2955 @@
+---
+title: "Govt Senior Project"
+author: "Rebecca Salzer"
+date: '2022-10-24'
+output: html_document
+---
+
+```{r data input}
+senateDWAF <- read_csv("senateDWAF.csv")
+houseDWAF <- read_csv("houseDWAF.csv")
+senateDW <- read_csv("senateDW.csv")
+houseDW <- read_csv("houseDW.csv")
+senateNARAL <- read_csv("senateNARAL.csv")
+houseNARAL <- read_csv("houseNARAL.csv")
+senateCAGW <- read_csv("senateCAGW.csv")
+houseCAGW <- read_csv("houseCAGW.csv")
+senateHRC <- read_csv("senateHRC.csv")
+houseHRC <- read_csv("houseHRC.csv")
+senateACLU <- read_csv("senateACLU.csv")
+houseACLU <- read_csv("houseACLU.csv")
+senateRTL <- read_csv("senateRTL.csv")
+houseRTL <- read_csv("houseRTL.csv")
+senatePA <- read_csv("senatePA.csv")
+housePA <- read_csv("housePA.csv")
+senateCFLW <- read_csv("senateCFLW.csv")
+houseCFLW <- read_csv("houseCFLW.csv")
+senateAPHA <- read_csv("senateAPHA.csv")
+houseAPHA <- read_csv("houseAPHA.csv")
+senateNTU <- read_csv("senateNTU.csv")
+houseNTU <- read_csv("houseNTU.csv")
+ANES <- read_csv("ANES.csv")
+ANESenvironment <- read_csv("ANESenvironment.csv")
+```
+
+```{r ANES variable manipulation}
+library(dplyr)
+#create partyID
+ANES <- ANES %>% mutate(PARTYID = case_when((year > 2008) & PartyID == 1 & StrongID == 1 ~ '1', #strong dem
+                                            (year > 2008) & PartyID == 1 & StrongID == 2 ~ '2', #not strong dem
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 3 ~ '3', #Lean dem
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 2 ~ '4', #no lean
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 1 ~ '5', #lean rep
+                                            (year > 2008) & PartyID == 2 & StrongID == 2 ~ '6', #not strong rep
+                                            (year > 2008) & PartyID == 2 & StrongID == 1 ~ '7', #strong rep
+                                            year=1992 & PartyID == 5 & StrongID == 1 ~ '1', 
+                                            year=1992 & PartyID == 5 & StrongID == 5 ~ '2', 
+                                            year=1992 & (PartyID == 3 || 5 || 0) & LeanID == 5 ~ '3', 
+                                            year=1992 & (PartyID == 3 || 5 || 0) & LeanID == 3 ~ '4', 
+                                            year=1992 & (PartyID == 3 || 5 || 0) & LeanID == 1 ~ '5', 
+                                            year=1992 & PartyID == 1 & StrongID == 5 ~ '6', 
+                                            year=1992 & PartyID == 1 & StrongID == 1 ~ '7',  
+                                            year= 1996  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 1996  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 1996  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 1996  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year= 2000  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 2000  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 2000  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 2000  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year= 2008  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 2008  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 2008  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 2008  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year=2004 & PartyID == 2 & StrongID == 1 ~ '1', 
+                                            year=2004 & PartyID == 2 & StrongID == 5 ~ '2', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year=2004 & PartyID == 1 & StrongID == 5 ~ '6', 
+                                            year=2004 & PartyID == 1 & StrongID == 1 ~ '7'))
+ANES <- ANES %>% mutate(Party = case_when(PARTYID < 4 ~ '1', #Dem
+                                          PARTYID > 4 ~ '2', #Rep
+                                          PARTYID == 4 ~ '3' ))  #independent
+ANESenvironment <- ANESenvironment %>% mutate(PARTYID = case_when(year>1992 & PartyID == 1 & StrongID == 1 ~ '1', #strong dem
+                                            (year > 2008) & PartyID == 1 & StrongID == 2 ~ '2', #not strong dem
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 3 ~ '3', #Lean dem
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 2 ~ '4', #no lean
+                                            (year > 2008) & (PartyID == 3 || 5 || 0) & LeanID == 1 ~ '5', #lean rep
+                                            (year > 2008) & PartyID == 2 & StrongID == 2 ~ '6', #not strong rep
+                                            (year > 2008) & PartyID == 2 & StrongID == 1 ~ '7', #strong rep
+                                            year= 1996  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 1996  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 1996  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 1996  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 1996  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year= 2000  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 2000  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 2000  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 2000  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 2000  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year= 2008  & PartyID == 1 & StrongID == 1 ~ '1', 
+                                            year= 2008  & PartyID == 1 & StrongID == 5 ~ '2',
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year= 2008  & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year= 2008  & PartyID == 2 & StrongID == 5 ~ '6',
+                                            year= 2008  & PartyID == 2 & StrongID == 1 ~ '7',
+                                            year=2004 & PartyID == 2 & StrongID == 1 ~ '1', 
+                                            year=2004 & PartyID == 2 & StrongID == 5 ~ '2', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 5 ~ '3', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 3 ~ '4', 
+                                            year=2004 & (PartyID == 3 || 5 || 4) & LeanID == 1 ~ '5', 
+                                            year=2004 & PartyID == 1 & StrongID == 5 ~ '6', 
+                                            year=2004 & PartyID == 1 & StrongID == 1 ~ '7'))
+ANESenvironment <- ANESenvironment %>% mutate(Party = case_when(PARTYID < 4 ~ '1', #Dem
+                                          PARTYID > 4 ~ '2', #Rep
+                                          PARTYID == 4 ~ '3' )) #independent 
+#create feeling thermom polarization measure 
+ANES <- ANES %>% mutate(thermom = abs(Demthermom-Repthermom)) 
+ANES$PARTYID <-as.numeric(ANES$PARTYID)
+ANES$Party <-as.numeric(ANES$Party)
+ANESenvironment$PARTYID <-as.numeric(ANESenvironment$PARTYID)
+ANESenvironment$Party <-as.numeric(ANESenvironment$Party)
+ANES$Gender[ANES$Gender==3]<-NA #other
+#create ideology scale
+ANESideo <- ANES
+ANESideo <- ANESideo[complete.cases(ANESideo$Defense7pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$Spending7pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$Blacks7pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$Healthcare7pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$Abortion4pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$ConservLib7pt),]
+ANESideo <-ANESideo[complete.cases(ANESideo$Jobs7pt),]
+ANESideo <-ANESideo <- ANESideo %>% mutate (conserv = case_when(Defense7pt > 4 ~ 1,
+                                                     Defense7pt <= 4 ~ 0)) #7 is most conserv
+ANESideo <- ANESideo %>% mutate (conserv = case_when(Jobs7pt > 4 ~ (conserv+1), #7 is most conserv
+                                                     Jobs7pt <= 4 ~ conserv))
+ANESideo <- ANESideo %>% mutate (conserv = case_when(Spending7pt < 4 ~ (conserv+1), #1 is most conserv
+                                                     Spending7pt >= 4 ~ conserv))
+ANESideo <- ANESideo %>% mutate (conserv = case_when(Healthcare7pt > 4 ~ (conserv+1), #7 is most conserv
+                                                     Healthcare7pt <= 4 ~ conserv))
+ANESideo <- ANESideo %>% mutate (conserv = case_when(Blacks7pt > 4 ~ (conserv+1), #7 is most conserv
+                                                     Blacks7pt <= 4 ~ conserv))
+ANESideo <- ANESideo %>% mutate (conserv = case_when(ConservLib7pt > 4 ~ (conserv+1), #7 is most conserv
+                                                     ConservLib7pt <= 4 ~ conserv))
+ANESideo <- ANESideo %>% mutate (conserv = case_when(Abortion4pt <= 2  ~ (conserv+1), # 1 and 2 are more conserv answers
+                                                     Abortion4pt > 2 ~ conserv))
+ANESideo <- ANESideo %>% mutate (lib = case_when(Defense7pt < 4 ~ 1,
+                                                 Defense7pt >= 4 ~ 0)) 
+ANESideo <- ANESideo %>% mutate (lib = case_when(Jobs7pt < 4 ~ (lib+1), 
+                                                     Jobs7pt >= 4 ~ lib))
+ANESideo <- ANESideo %>% mutate (lib = case_when(Spending7pt > 4 ~ (lib+1), 
+                                                     Spending7pt <= 4 ~ lib))
+ANESideo <- ANESideo %>% mutate (lib = case_when(Healthcare7pt < 4 ~ (lib+1), 
+                                                     Healthcare7pt >= 4 ~ lib))
+ANESideo <- ANESideo %>% mutate (lib = case_when(Blacks7pt < 4 ~ (lib+1), 
+                                                     Blacks7pt >= 4 ~ lib))
+ANESideo <- ANESideo %>% mutate (lib = case_when(ConservLib7pt < 4 ~ (lib+1),
+                                                     ConservLib7pt >= 4 ~ lib))
+ANESideo <- ANESideo %>% mutate (lib = case_when(Abortion4pt >= 3 ~ (lib+1), 
+                                                     Abortion4pt < 3 ~ lib))
+ANESideo <- ANESideo %>% mutate(ideomeasure = abs(conserv-lib)) 
+view(ANESideo)
+```
+
+```{r affective polarization analysis}
+attach(ANES)
+options(messages = - 1) 
+ANES1992<- ANES %>% filter(year == 1992)
+(weighted.mean(ANES1992$thermom, ANES1992$Weight, na.rm = TRUE))
+ANES1996<- ANES %>% filter(year == 1996)
+(weighted.mean(ANES1996$thermom, ANES1996$Weight, na.rm = TRUE))
+ANES2000<- ANES %>% filter(year == 2000)
+(weighted.mean(ANES2000$thermom, ANES2000$Weight, na.rm = TRUE))
+ANES2004<- ANES %>% filter(year == 2004)
+(weighted.mean(ANES2004$thermom, ANES2004$Weight, na.rm = TRUE))
+ANES2008<- ANES %>% filter(year == 2008)
+(weighted.mean(ANES2008$thermom, ANES2008$Weight, na.rm = TRUE))
+ANES2012<- ANES %>% filter(year == 2012)
+(weighted.mean(ANES2012$thermom, ANES2012$Weight, na.rm = TRUE))
+ANES2016<- ANES %>% filter(year == 2016)
+(weighted.mean(ANES2016$thermom, ANES2016$Weight, na.rm = TRUE))
+ANES2020<- ANES %>% filter(year == 2020)
+(weighted.mean(ANES2020$thermom, ANES2020$Weight, na.rm = TRUE))
+#there is already clear evidence that affective polarization is increasing
+```
+
+```{r affective polarization by party}
+ANES1992dem<- ANES %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANES1992dem$thermom, ANES1992dem$Weight, na.rm = TRUE))
+ANES1992rep<- ANES %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANES1992rep$thermom, ANES1992rep$Weight, na.rm = TRUE))
+
+ANES1996dem<- ANES %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANES1996dem$thermom, ANES1996dem$Weight, na.rm = TRUE))
+ANES1996rep<- ANES %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANES1996rep$thermom, ANES1996rep$Weight, na.rm = TRUE))
+
+ANES2000dem<- ANES %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANES2000dem$thermom, ANES2000dem$Weight, na.rm = TRUE))
+ANES2000rep<- ANES %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANES2000rep$thermom, ANES2000rep$Weight, na.rm = TRUE))
+
+ANES2004dem<- ANES %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANES2004dem$thermom, ANES2004dem$Weight, na.rm = TRUE))
+ANES2004rep<- ANES %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANES2004rep$thermom, ANES2004rep$Weight, na.rm = TRUE))
+
+ANES2008dem<- ANES %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANES2008dem$thermom, ANES2008dem$Weight, na.rm = TRUE))
+ANES2008rep<- ANES %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANES2008rep$thermom, ANES2008rep$Weight, na.rm = TRUE))
+
+ANES2012dem<- ANES %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANES2012dem$thermom, ANES2012dem$Weight, na.rm = TRUE))
+ANES2012rep<- ANES %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANES2012rep$thermom, ANES2012rep$Weight, na.rm = TRUE))
+
+ANES2016dem<- ANES %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANES2016dem$thermom, ANES2016dem$Weight, na.rm = TRUE))
+ANES2016rep<- ANES %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANES2016rep$thermom, ANES2016rep$Weight, na.rm = TRUE))
+
+ANES2020dem<- ANES %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANES2020dem$thermom, ANES2020dem$Weight, na.rm = TRUE))
+ANES2020rep<- ANES %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANES2020rep$thermom, ANES2020rep$Weight, na.rm = TRUE))
+```
+
+```{r affective polarization by race}
+ANES1992white<- ANES %>% filter(year == 1992 & Race == 1) #White
+(weighted.mean(ANES1992white$thermom, ANES1992white$Weight, na.rm = TRUE))
+ANES1992black<- ANES %>% filter(year == 1992 & Race == 2) #Black
+(weighted.mean(ANES1992black$thermom, ANES1992black$Weight, na.rm = TRUE))
+ANES1992hispanic<- ANES %>% filter(year == 1992 & Hispanic == 1) #Hispanic
+(weighted.mean(ANES1992hispanic$thermom, ANES1992hispanic$Weight, na.rm = TRUE))
+
+ANES1996white<- ANES %>% filter(year == 1996 & Race == 1)
+(weighted.mean(ANES1996white$thermom, ANES1996white$Weight, na.rm = TRUE))
+ANES1996black<- ANES %>% filter(year == 1996 & Race == 2)
+(weighted.mean(ANES1996black$thermom, ANES1996black$Weight, na.rm = TRUE))
+ANES1996hispanic<- ANES %>% filter(year == 1996 & Hispanic == 1)
+(weighted.mean(ANES1996hispanic$thermom, ANES1996hispanic$Weight, na.rm = TRUE))
+
+ANES2000white<- ANES %>% filter(year == 2000 & Race == 1)
+(weighted.mean(ANES2000white$thermom, ANES2000white$Weight, na.rm = TRUE))
+ANES2000black<- ANES %>% filter(year == 2000 & Race == 2)
+(weighted.mean(ANES2000black$thermom, ANES2000black$Weight, na.rm = TRUE))
+ANES2000hispanic<- ANES %>% filter(year == 2000 & Hispanic == 1)
+(weighted.mean(ANES2000hispanic$thermom, ANES2000hispanic$Weight, na.rm = TRUE))
+
+ANES2004white<- ANES %>% filter(year == 2004 & Race == 1)
+(weighted.mean(ANES2004white$thermom, ANES2004white$Weight, na.rm = TRUE))
+ANES2004black<- ANES %>% filter(year == 2004 & Race == 2)
+(weighted.mean(ANES2004black$thermom, ANES2004black$Weight, na.rm = TRUE))
+ANES2004hispanic<- ANES %>% filter(year == 2004 & Hispanic == 1)
+(weighted.mean(ANES2004hispanic$thermom, ANES2004hispanic$Weight, na.rm = TRUE))
+
+ANES2008white<- ANES %>% filter(year == 2008 & Race == 1)
+(weighted.mean(ANES2008white$thermom, ANES2008white$Weight, na.rm = TRUE))
+ANES2008black<- ANES %>% filter(year == 2008 & Race == 2)
+(weighted.mean(ANES2008black$thermom, ANES2008black$Weight, na.rm = TRUE))
+ANES2008hispanic<- ANES %>% filter(year == 2008 & Hispanic == 1)
+(weighted.mean(ANES2008hispanic$thermom, ANES2008hispanic$Weight, na.rm = TRUE))
+
+ANES2012white<- ANES %>% filter(year == 2012 & Race == 1)
+(weighted.mean(ANES2012white$thermom, ANES2012white$Weight, na.rm = TRUE))
+ANES2012black<- ANES %>% filter(year == 2012 & Race == 2)
+(weighted.mean(ANES2012black$thermom, ANES2012black$Weight, na.rm = TRUE))
+ANES2012hispanic<- ANES %>% filter(year == 2012 & Hispanic == 1)
+(weighted.mean(ANES2012hispanic$thermom, ANES2012hispanic$Weight, na.rm = TRUE))
+
+ANES2016white<- ANES %>% filter(year == 2016 & Race == 1)
+(weighted.mean(ANES2016white$thermom, ANES2016white$Weight, na.rm = TRUE))
+ANES2016black<- ANES %>% filter(year == 2016 & Race == 2)
+(weighted.mean(ANES2016black$thermom, ANES2016black$Weight, na.rm = TRUE))
+ANES2016hispanic<- ANES %>% filter(year == 2016 & Hispanic == 1)
+(weighted.mean(ANES2016hispanic$thermom, ANES2016hispanic$Weight, na.rm = TRUE))
+
+ANES2020white<- ANES %>% filter(year == 2020 & Race == 1)
+(weighted.mean(ANES2020white$thermom, ANES2020white$Weight, na.rm = TRUE))
+ANES2020black<- ANES %>% filter(year == 2020 & Race == 2)
+(weighted.mean(ANES2020black$thermom, ANES2020black$Weight, na.rm = TRUE))
+ANES2020hispanic<- ANES %>% filter(year == 2020 & Hispanic == 1)
+(weighted.mean(ANES2020hispanic$thermom, ANES2020hispanic$Weight, na.rm = TRUE))
+```
+
+```{r affective polarization by gender}
+ANES1992male<- ANES %>% filter(year == 1992 & Gender == 1)
+(weighted.mean(ANES1992male$thermom, ANES1992male$Weight, na.rm = TRUE))
+ANES1992female<- ANES %>% filter(year == 1992 & Gender == 2)
+(weighted.mean(ANES1992female$thermom, ANES1992female$Weight, na.rm = TRUE))
+
+ANES1996male<- ANES %>% filter(year == 1996 & Gender == 1)
+(weighted.mean(ANES1996male$thermom, ANES1996male$Weight, na.rm = TRUE))
+ANES1996female<- ANES %>% filter(year == 1996 & Gender == 2)
+(weighted.mean(ANES1996female$thermom, ANES1996female$Weight, na.rm = TRUE))
+
+ANES2000male<- ANES %>% filter(year == 2000 & Gender == 1)
+(weighted.mean(ANES2000male$thermom, ANES2000male$Weight, na.rm = TRUE))
+ANES2000female<- ANES %>% filter(year == 2000 & Gender == 2)
+(weighted.mean(ANES2000female$thermom, ANES2000female$Weight, na.rm = TRUE))
+
+ANES2004male<- ANES %>% filter(year == 2004 & Gender == 1)
+(weighted.mean(ANES2004male$thermom, ANES2004male$Weight, na.rm = TRUE))
+ANES2004female<- ANES %>% filter(year == 2004 & Gender == 2)
+(weighted.mean(ANES2004female$thermom, ANES2004female$Weight, na.rm = TRUE))
+
+ANES2008male<- ANES %>% filter(year == 2008 & Gender == 1)
+(weighted.mean(ANES2008male$thermom, ANES2008male$Weight, na.rm = TRUE))
+ANES2008female<- ANES %>% filter(year == 2008 & Gender == 2)
+(weighted.mean(ANES2008female$thermom, ANES2008female$Weight, na.rm = TRUE))
+
+ANES2012male<- ANES %>% filter(year == 2012 & Gender == 1)
+(weighted.mean(ANES2012male$thermom, ANES2012male$Weight, na.rm = TRUE))
+ANES2012female<- ANES %>% filter(year == 2012 & Gender == 2)
+(weighted.mean(ANES2012female$thermom, ANES2012female$Weight, na.rm = TRUE))
+
+ANES2016male<- ANES %>% filter(year == 2016 & Gender == 1)
+(weighted.mean(ANES2016male$thermom, ANES2016male$Weight, na.rm = TRUE))
+ANES2016female<- ANES %>% filter(year == 2016 & Gender == 2)
+(weighted.mean(ANES2016female$thermom, ANES2016female$Weight, na.rm = TRUE))
+
+ANES2020male<- ANES %>% filter(year == 2020 & Gender == 1)
+(weighted.mean(ANES2020male$thermom, ANES2020male$Weight, na.rm = TRUE))
+ANES2020female<- ANES %>% filter(year == 2020 & Gender == 2)
+(weighted.mean(ANES2020female$thermom, ANES2020female$Weight, na.rm = TRUE))
+#very little gender differences
+```
+
+```{r affective polarization by attention}
+ANES1992always<- ANES %>% filter(year == 1992 & Attention == 1)
+(weighted.mean(ANES1992always$thermom, ANES1992always$Weight, na.rm = TRUE))
+ANES1992half<- ANES %>% filter(year == 1992 & Attention == 3)
+(weighted.mean(ANES1992half$thermom, ANES1992half$Weight, na.rm = TRUE))
+ANES1992never<- ANES %>% filter(year == 1992 & Attention == 5)
+(weighted.mean(ANES1992never$thermom, ANES1992never$Weight, na.rm = TRUE))
+
+ANES1996always<- ANES %>% filter(year == 1996 & Attention == 1)
+(weighted.mean(ANES1996always$thermom, ANES1996always$Weight, na.rm = TRUE))
+ANES1996half<- ANES %>% filter(year == 1996 & Attention == 3)
+(weighted.mean(ANES1996half$thermom, ANES1996half$Weight, na.rm = TRUE))
+ANES1996never<- ANES %>% filter(year == 1996 & Attention == 5)
+(weighted.mean(ANES1996never$thermom, ANES1996never$Weight, na.rm = TRUE))
+
+ANES2000always<- ANES %>% filter(year == 2000 & Attention == 1)
+(weighted.mean(ANES2000always$thermom, ANES2000always$Weight, na.rm = TRUE))
+ANES2000half<- ANES %>% filter(year == 2000 & Attention == 3)
+(weighted.mean(ANES2000half$thermom, ANES2000half$Weight, na.rm = TRUE))
+ANES2000never<- ANES %>% filter(year == 2000 & Attention == 5)
+(weighted.mean(ANES2000never$thermom, ANES2000never$Weight, na.rm = TRUE))
+
+ANES2004always<- ANES %>% filter(year == 2004 & Attention == 1)
+(weighted.mean(ANES2004always$thermom, ANES2004always$Weight, na.rm = TRUE))
+ANES2004half<- ANES %>% filter(year == 2004 & Attention == 3)
+(weighted.mean(ANES2004half$thermom, ANES2004half$Weight, na.rm = TRUE))
+ANES2004never<- ANES %>% filter(year == 2004 & Attention == 5)
+(weighted.mean(ANES2004never$thermom, ANES2004never$Weight, na.rm = TRUE))
+
+ANES2008always<- ANES %>% filter(year == 2008 & (Attention == 1))
+(weighted.mean(ANES2008always$thermom, ANES2008always$Weight, na.rm = TRUE))
+ANES2008half<- ANES %>% filter(year == 2008 & Attention == 3)
+(weighted.mean(ANES2008half$thermom, ANES2008half$Weight, na.rm = TRUE))
+ANES2008never<- ANES %>% filter(year == 2008 & (Attention == 5))
+(weighted.mean(ANES2008never$thermom, ANES2008never$Weight, na.rm = TRUE))
+
+ANES2012always<- ANES %>% filter(year == 2012 & (Attention == 1))
+(weighted.mean(ANES2012always$thermom, ANES2012always$Weight, na.rm = TRUE))
+ANES2012half<- ANES %>% filter(year == 2012 & Attention == 3)
+(weighted.mean(ANES2012half$thermom, ANES2012half$Weight, na.rm = TRUE))
+ANES2012never<- ANES %>% filter(year == 2012 & (Attention == 5))
+(weighted.mean(ANES2012never$thermom, ANES2012never$Weight, na.rm = TRUE))
+
+ANES2016always<- ANES %>% filter(year == 2016 & (Attention == 1))
+(weighted.mean(ANES2016always$thermom, ANES2016always$Weight, na.rm = TRUE))
+ANES2016half<- ANES %>% filter(year == 2016 & Attention == 3)
+(weighted.mean(ANES2016half$thermom, ANES2016half$Weight, na.rm = TRUE))
+ANES2016never<- ANES %>% filter(year == 2016 & (Attention == 5))
+(weighted.mean(ANES2016never$thermom, ANES2016never$Weight, na.rm = TRUE))
+
+ANES2020always<- ANES %>% filter(year == 2020 & (Attention == 1))
+(weighted.mean(ANES2020always$thermom, ANES2020always$Weight, na.rm = TRUE))
+ANES2020half<- ANES %>% filter(year == 2020 & Attention == 3)
+(weighted.mean(ANES2020half$thermom, ANES2020half$Weight, na.rm = TRUE))
+ANES2020never<- ANES %>% filter(year == 2020 & Attention == 5)
+(weighted.mean(ANES2020never$thermom, ANES2020never$Weight, na.rm = TRUE))
+```
+
+```{r affective polarization by education}
+ANES1992hsorless<- ANES %>% filter(year == 1992 & Education < 3)
+(weighted.mean(ANES1992hsorless$thermom, ANES1992hsorless$Weight, na.rm = TRUE))
+ANES1992college<- ANES %>% filter(year == 1992 & Education > 2 & Education < 5)
+(weighted.mean(ANES1992college$thermom, ANES1992college$Weight, na.rm = TRUE))
+ANES1992advanced<- ANES %>% filter(year == 1992 & Education == 5)
+(weighted.mean(ANES1992advanced$thermom, ANES1992advanced$Weight, na.rm = TRUE))
+
+ANES1996hsorless<- ANES %>% filter(year == 1996 & Education < 3)
+(weighted.mean(ANES1996hsorless$thermom, ANES1996hsorless$Weight, na.rm = TRUE))
+ANES1996college<- ANES %>% filter(year == 1996 & Education > 2 & Education < 5)
+(weighted.mean(ANES1996college$thermom, ANES1996college$Weight, na.rm = TRUE))
+ANES1996advanced<- ANES %>% filter(year == 1996 & Education == 5)
+(weighted.mean(ANES1996advanced$thermom, ANES1996advanced$Weight, na.rm = TRUE))
+
+ANES2000hsorless<- ANES %>% filter(year == 2000 & Education < 3)
+(weighted.mean(ANES2000hsorless$thermom, ANES2000hsorless$Weight, na.rm = TRUE))
+ANES2000college<- ANES %>% filter(year == 2000 & Education > 2 & Education < 5)
+(weighted.mean(ANES2000college$thermom, ANES2000college$Weight, na.rm = TRUE))
+ANES2000advanced<- ANES %>% filter(year == 2000 & Education == 5)
+(weighted.mean(ANES2000advanced$thermom, ANES2000advanced$Weight, na.rm = TRUE))
+
+ANES2004hsorless<- ANES %>% filter(year == 2004 & Education < 3)
+(weighted.mean(ANES2004hsorless$thermom, ANES2004hsorless$Weight, na.rm = TRUE))
+ANES2004college<- ANES %>% filter(year == 2004 & Education > 2 & Education < 5)
+(weighted.mean(ANES2004college$thermom, ANES2004college$Weight, na.rm = TRUE))
+ANES2004advanced<- ANES %>% filter(year == 2004 & Education == 5)
+(weighted.mean(ANES2004advanced$thermom, ANES2004advanced$Weight, na.rm = TRUE))
+
+ANES2008hsorless<- ANES %>% filter(year == 2008 & Education < 3)
+(weighted.mean(ANES2008hsorless$thermom, ANES2008hsorless$Weight, na.rm = TRUE))
+ANES2008college<- ANES %>% filter(year == 2008 & Education > 2 & Education < 5)
+(weighted.mean(ANES2008college$thermom, ANES2008college$Weight, na.rm = TRUE))
+ANES2008advanced<- ANES %>% filter(year == 2008 & Education == 5)
+(weighted.mean(ANES2008advanced$thermom, ANES2008advanced$Weight, na.rm = TRUE))
+
+ANES2012hsorless<- ANES %>% filter(year == 2012 & Education < 3)
+(weighted.mean(ANES2012hsorless$thermom, ANES2012hsorless$Weight, na.rm = TRUE))
+ANES2012college<- ANES %>% filter(year == 2012 & Education > 2 & Education < 5)
+(weighted.mean(ANES2012college$thermom, ANES2012college$Weight, na.rm = TRUE))
+ANES2012advanced<- ANES %>% filter(year == 2012 & Education == 5)
+(weighted.mean(ANES2012advanced$thermom, ANES2012advanced$Weight, na.rm = TRUE))
+
+ANES2016hsorless<- ANES %>% filter(year == 2016 & Education < 3)
+(weighted.mean(ANES2016hsorless$thermom, ANES2016hsorless$Weight, na.rm = TRUE))
+ANES2016college<- ANES %>% filter(year == 2016 & Education > 2 & Education < 5)
+(weighted.mean(ANES2016college$thermom, ANES2016college$Weight, na.rm = TRUE))
+ANES2016advanced<- ANES %>% filter(year == 2016 & Education == 5)
+(weighted.mean(ANES2016advanced$thermom, ANES2016advanced$Weight, na.rm = TRUE))
+
+ANES2020hsorless<- ANES %>% filter(year == 2020 & Education < 3)
+(weighted.mean(ANES2020hsorless$thermom, ANES2020hsorless$Weight, na.rm = TRUE))
+ANES2020college<- ANES %>% filter(year == 2020 & Education > 2 & Education < 5)
+(weighted.mean(ANES2020college$thermom, ANES2020college$Weight, na.rm = TRUE))
+ANES2020advanced<- ANES %>% filter(year == 2020 & Education == 5)
+(weighted.mean(ANES2020advanced$thermom, ANES2020advanced$Weight, na.rm = TRUE))
+```
+
+```{r affective polarization by age}
+ANES19921729<- ANES %>% filter(year == 1992 & Age < 30)
+(weighted.mean(ANES19921729$thermom, ANES19921729$Weight, na.rm = TRUE))
+ANES19923044<- ANES %>% filter(year == 1992 & Age < 45 & Age > 29)
+(weighted.mean(ANES19923044$thermom, ANES19923044$Weight, na.rm = TRUE))
+ANES19924564<- ANES %>% filter(year == 1992 & Age > 44 & Age < 65)
+(weighted.mean(ANES19924564$thermom, ANES19924564$Weight, na.rm = TRUE))
+ANES199265<- ANES %>% filter(year == 1992 & Age > 64)
+(weighted.mean(ANES199265$thermom, ANES199265$Weight, na.rm = TRUE))
+
+ANES19961729<- ANES %>% filter(year == 1996 & Age < 30)
+(weighted.mean(ANES19961729$thermom, ANES19961729$Weight, na.rm = TRUE))
+ANES19963044<- ANES %>% filter(year == 1996 & Age < 45 & Age > 29)
+(weighted.mean(ANES19963044$thermom, ANES19963044$Weight, na.rm = TRUE))
+ANES19964564<- ANES %>% filter(year == 1996 & Age > 44 & Age < 65)
+(weighted.mean(ANES19964564$thermom, ANES19964564$Weight, na.rm = TRUE))
+ANES199665<- ANES %>% filter(year == 1996 & Age > 64)
+(weighted.mean(ANES199665$thermom, ANES199665$Weight, na.rm = TRUE))
+
+ANES20001729<- ANES %>% filter(year == 2000 & Age < 30)
+(weighted.mean(ANES20001729$thermom, ANES20001729$Weight, na.rm = TRUE))
+ANES20003044<- ANES %>% filter(year == 2000 & Age < 45 & Age > 29)
+(weighted.mean(ANES20003044$thermom, ANES20003044$Weight, na.rm = TRUE))
+ANES20004564<- ANES %>% filter(year == 2000 & Age > 44 & Age < 65)
+(weighted.mean(ANES20004564$thermom, ANES20004564$Weight, na.rm = TRUE))
+ANES200065<- ANES %>% filter(year == 2000 & Age > 64)
+(weighted.mean(ANES200065$thermom, ANES200065$Weight, na.rm = TRUE))
+
+ANES20041729<- ANES %>% filter(year == 2004 & Age < 30)
+(weighted.mean(ANES20041729$thermom, ANES20041729$Weight, na.rm = TRUE))
+ANES20043044<- ANES %>% filter(year == 2004 & Age < 45 & Age > 29)
+(weighted.mean(ANES20043044$thermom, ANES20043044$Weight, na.rm = TRUE))
+ANES20044564<- ANES %>% filter(year == 2004 & Age > 44 & Age < 65)
+(weighted.mean(ANES20044564$thermom, ANES20044564$Weight, na.rm = TRUE))
+ANES200465<- ANES %>% filter(year == 2004 & Age > 64)
+(weighted.mean(ANES200465$thermom, ANES200465$Weight, na.rm = TRUE))
+
+ANES20081729<- ANES %>% filter(year == 2008 & Age < 30)
+(weighted.mean(ANES20081729$thermom, ANES20081729$Weight, na.rm = TRUE))
+ANES20083044<- ANES %>% filter(year == 2008 & Age < 45 & Age > 29)
+(weighted.mean(ANES20083044$thermom, ANES20083044$Weight, na.rm = TRUE))
+ANES20084564<- ANES %>% filter(year == 2008 & Age > 44 & Age < 65)
+(weighted.mean(ANES20084564$thermom, ANES20084564$Weight, na.rm = TRUE))
+ANES200865<- ANES %>% filter(year == 2008 & Age > 64)
+(weighted.mean(ANES200865$thermom, ANES200865$Weight, na.rm = TRUE))
+
+ANES20121729<- ANES %>% filter(year == 2012 & Age < 30)
+(weighted.mean(ANES20121729$thermom, ANES20121729$Weight, na.rm = TRUE))
+ANES20123044<- ANES %>% filter(year == 2012 & Age < 45 & Age > 29)
+(weighted.mean(ANES20123044$thermom, ANES20123044$Weight, na.rm = TRUE))
+ANES20124564<- ANES %>% filter(year == 2012 & Age > 44 & Age < 65)
+(weighted.mean(ANES20124564$thermom, ANES20124564$Weight, na.rm = TRUE))
+ANES201265<- ANES %>% filter(year == 2012 & Age > 64)
+(weighted.mean(ANES201265$thermom, ANES201265$Weight, na.rm = TRUE))
+
+ANES20161729<- ANES %>% filter(year == 2016 & Age < 30)
+(weighted.mean(ANES20161729$thermom, ANES20161729$Weight, na.rm = TRUE))
+ANES20163044<- ANES %>% filter(year == 2016 & Age < 45 & Age > 29)
+(weighted.mean(ANES20163044$thermom, ANES20163044$Weight, na.rm = TRUE))
+ANES20164564<- ANES %>% filter(year == 2016 & Age > 44 & Age < 65)
+(weighted.mean(ANES20164564$thermom, ANES20164564$Weight, na.rm = TRUE))
+ANES201665<- ANES %>% filter(year == 2016 & Age > 64)
+(weighted.mean(ANES201665$thermom, ANES201665$Weight, na.rm = TRUE))
+
+ANES20201729<- ANES %>% filter(year == 2020 & Age < 30)
+(weighted.mean(ANES20201729$thermom, ANES20201729$Weight, na.rm = TRUE))
+ANES20203044<- ANES %>% filter(year == 2020 & Age < 45 & Age > 29)
+(weighted.mean(ANES20203044$thermom, ANES20203044$Weight, na.rm = TRUE))
+ANES20204564<- ANES %>% filter(year == 2020 & Age > 44 & Age < 65)
+(weighted.mean(ANES20204564$thermom, ANES20204564$Weight, na.rm = TRUE))
+ANES202065<- ANES %>% filter(year == 2020 & Age > 64)
+(weighted.mean(ANES202065$thermom, ANES202065$Weight, na.rm = TRUE))
+```
+
+```{r affective polarization regression}
+#need to scale before doing this
+ANESreg <- ANES
+ANESreg$Gender <- as.character(ANESreg$Gender)
+ANESreg$Gender[ANESreg$Gender==1]<-"male"
+ANESreg$Gender[ANESreg$Gender==2]<-"female"
+ANESreg$Gender[ANESreg$Gender==0]<- NA
+ANESreg$Race <- as.character(ANESreg$Race)
+ANESreg$Race[ANESreg$Race==1]<-"white"
+ANESreg$Race[ANESreg$Race==2]<-"black"
+ANESreg$Attention <- as.character(ANESreg$Attention)
+ANESreg$Attention[ANESreg$Attention==1]<-"always/most"
+ANESreg$Attention[ANESreg$Attention==3]<-"half"
+ANESreg$Attention[ANESreg$Attention==5]<-"some/never"
+ANESreg$Hispanic <- as.character(ANESreg$Hispanic)
+ANESreg$Hispanic[ANESreg$Hispanic==2]<-"nonhispanic"
+ANESreg$Hispanic[ANESreg$Hispanic==1]<-"hispanic"
+ANESreg$Hispanic[ANESreg$Hispanic==0]<- NA
+ANESreg$Party <- as.character(ANESreg$Party)
+ANESreg$Party[ANESreg$Party==1]<-"democrat"
+ANESreg$Party[ANESreg$Party==2]<-"republican"
+ANESreg$Party[ANESreg$Party==3]<-"independent"
+ANESreg$Education <- as.character(ANESreg$Education)
+ANESreg$Education[ANESreg$Education==1]<-"nohs"
+ANESreg$Education[ANESreg$Education==2]<-"hs"
+ANESreg$Education[ANESreg$Education==3]<-"somecollege"
+ANESreg$Education[ANESreg$Education==4]<-"bachelors"
+ANESreg$Education[ANESreg$Education==5]<-"advanceddegree"
+ANES_we <- ANESreg %>% as_survey(weights = c(Weight))
+model <- svyglm(thermom~Attention + Education + Gender + Age + Race + Hispanic + Party + year, design = ANES_we)
+summary(model)
+```
+
+```{r ideological polarization analysis}
+attach(ANESideo)
+options(messages = - 1) 
+ANESideo1992<- ANESideo %>% filter(year == 1992)
+(weighted.mean(ANESideo1992$ideomeasure, ANESideo1992$Weight, na.rm = TRUE))
+ANESideo1996<- ANESideo %>% filter(year == 1996)
+(weighted.mean(ANESideo1996$ideomeasure, ANESideo1996$Weight, na.rm = TRUE))
+ANESideo2000<- ANESideo %>% filter(year == 2000)
+(weighted.mean(ANESideo2000$ideomeasure, ANESideo2000$Weight, na.rm = TRUE))
+ANESideo2004<- ANESideo %>% filter(year == 2004)
+(weighted.mean(ANESideo2004$ideomeasure, ANESideo2004$Weight, na.rm = TRUE))
+ANESideo2008<- ANESideo %>% filter(year == 2008)
+(weighted.mean(ANESideo2008$ideomeasure, ANESideo2008$Weight, na.rm = TRUE))
+ANESideo2012<- ANESideo %>% filter(year == 2012)
+(weighted.mean(ANESideo2012$ideomeasure, ANESideo2012$Weight, na.rm = TRUE))
+ANESideo2016<- ANESideo %>% filter(year == 2016)
+(weighted.mean(ANESideo2016$ideomeasure, ANESideo2016$Weight, na.rm = TRUE))
+ANESideo2020<- ANESideo %>% filter(year == 2020)
+(weighted.mean(ANESideo2020$ideomeasure, ANESideo2020$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by party}
+ANESideo1992dem<- ANESideo %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideo1992dem$ideomeasure, ANESideo1992dem$Weight, na.rm = TRUE))
+ANESideo1992rep<- ANESideo %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideo1992rep$ideomeasure, ANESideo1992rep$Weight, na.rm = TRUE))
+
+ANESideo1996dem<- ANESideo %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideo1996dem$ideomeasure, ANESideo1996dem$Weight, na.rm = TRUE))
+ANESideo1996rep<- ANESideo %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideo1996rep$ideomeasure, ANESideo1996rep$Weight, na.rm = TRUE))
+
+ANESideo2000dem<- ANESideo %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideo2000dem$ideomeasure, ANESideo2000dem$Weight, na.rm = TRUE))
+ANESideo2000rep<- ANESideo %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideo2000rep$ideomeasure, ANESideo2000rep$Weight, na.rm = TRUE))
+
+ANESideo2004dem<- ANESideo %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideo2004dem$ideomeasure, ANESideo2004dem$Weight, na.rm = TRUE))
+ANESideo2004rep<- ANESideo %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideo2004rep$ideomeasure, ANESideo2004rep$Weight, na.rm = TRUE))
+
+ANESideo2008dem<- ANESideo %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideo2008dem$ideomeasure, ANESideo2008dem$Weight, na.rm = TRUE))
+ANESideo2008rep<- ANESideo %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideo2008rep$ideomeasure, ANESideo2008rep$Weight, na.rm = TRUE))
+
+ANESideo2012dem<- ANESideo %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideo2012dem$ideomeasure, ANESideo2012dem$Weight, na.rm = TRUE))
+ANESideo2012rep<- ANESideo %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideo2012rep$ideomeasure, ANESideo2012rep$Weight, na.rm = TRUE))
+
+ANESideo2016dem<- ANESideo %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideo2016dem$ideomeasure, ANESideo2016dem$Weight, na.rm = TRUE))
+ANESideo2016rep<- ANESideo %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideo2016rep$ideomeasure, ANESideo2016rep$Weight, na.rm = TRUE))
+
+ANESideo2020dem<- ANESideo %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideo2020dem$ideomeasure, ANESideo2020dem$Weight, na.rm = TRUE))
+ANESideo2020rep<- ANESideo %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideo2020rep$ideomeasure, ANESideo2020rep$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by race}
+ANESideo1992white<- ANESideo %>% filter(year == 1992 & Race == 1) #White
+(weighted.mean(ANESideo1992white$ideomeasure, ANESideo1992white$Weight, na.rm = TRUE))
+ANESideo1992black<- ANESideo %>% filter(year == 1992 & Race == 2) #Black
+(weighted.mean(ANESideo1992black$ideomeasure, ANESideo1992black$Weight, na.rm = TRUE))
+ANESideo1992hispanic<- ANESideo %>% filter(year == 1992 & Hispanic == 1) #Hispanic
+(weighted.mean(ANESideo1992hispanic$ideomeasure, ANESideo1992hispanic$Weight, na.rm = TRUE))
+
+ANESideo1996white<- ANESideo %>% filter(year == 1996 & Race == 1)
+(weighted.mean(ANESideo1996white$ideomeasure, ANESideo1996white$Weight, na.rm = TRUE))
+ANESideo1996black<- ANESideo %>% filter(year == 1996 & Race == 2)
+(weighted.mean(ANESideo1996black$ideomeasure, ANESideo1996black$Weight, na.rm = TRUE))
+ANESideo1996hispanic<- ANESideo %>% filter(year == 1996 & Hispanic == 1)
+(weighted.mean(ANESideo1996hispanic$ideomeasure, ANESideo1996hispanic$Weight, na.rm = TRUE))
+
+ANESideo2000white<- ANESideo %>% filter(year == 2000 & Race == 1)
+(weighted.mean(ANESideo2000white$ideomeasure, ANESideo2000white$Weight, na.rm = TRUE))
+ANESideo2000black<- ANESideo %>% filter(year == 2000 & Race == 2)
+(weighted.mean(ANESideo2000black$ideomeasure, ANESideo2000black$Weight, na.rm = TRUE))
+ANESideo2000hispanic<- ANESideo %>% filter(year == 2000 & Hispanic == 1)
+(weighted.mean(ANESideo2000hispanic$ideomeasure, ANESideo2000hispanic$Weight, na.rm = TRUE))
+
+ANESideo2004white<- ANESideo %>% filter(year == 2004 & Race == 1)
+(weighted.mean(ANESideo2004white$ideomeasure, ANESideo2004white$Weight, na.rm = TRUE))
+ANESideo2004black<- ANESideo %>% filter(year == 2004 & Race == 2)
+(weighted.mean(ANESideo2004black$ideomeasure, ANESideo2004black$Weight, na.rm = TRUE))
+ANESideo2004hispanic<- ANESideo %>% filter(year == 2004 & Hispanic == 1)
+(weighted.mean(ANESideo2004hispanic$ideomeasure, ANESideo2004hispanic$Weight, na.rm = TRUE))
+
+ANESideo2008white<- ANESideo %>% filter(year == 2008 & Race == 1)
+(weighted.mean(ANESideo2008white$ideomeasure, ANESideo2008white$Weight, na.rm = TRUE))
+ANESideo2008black<- ANESideo %>% filter(year == 2008 & Race == 2)
+(weighted.mean(ANESideo2008black$ideomeasure, ANESideo2008black$Weight, na.rm = TRUE))
+ANESideo2008hispanic<- ANESideo %>% filter(year == 2008 & Hispanic == 1)
+(weighted.mean(ANESideo2008hispanic$ideomeasure, ANESideo2008hispanic$Weight, na.rm = TRUE))
+
+ANESideo2012white<- ANESideo %>% filter(year == 2012 & Race == 1)
+(weighted.mean(ANESideo2012white$ideomeasure, ANESideo2012white$Weight, na.rm = TRUE))
+ANESideo2012black<- ANESideo %>% filter(year == 2012 & Race == 2)
+(weighted.mean(ANESideo2012black$ideomeasure, ANESideo2012black$Weight, na.rm = TRUE))
+ANESideo2012hispanic<- ANESideo %>% filter(year == 2012 & Hispanic == 1)
+(weighted.mean(ANESideo2012hispanic$ideomeasure, ANESideo2012hispanic$Weight, na.rm = TRUE))
+
+ANESideo2016white<- ANESideo %>% filter(year == 2016 & Race == 1)
+(weighted.mean(ANESideo2016white$ideomeasure, ANESideo2016white$Weight, na.rm = TRUE))
+ANESideo2016black<- ANESideo %>% filter(year == 2016 & Race == 2)
+(weighted.mean(ANESideo2016black$ideomeasure, ANESideo2016black$Weight, na.rm = TRUE))
+ANESideo2016hispanic<- ANESideo %>% filter(year == 2016 & Hispanic == 1)
+(weighted.mean(ANESideo2016hispanic$ideomeasure, ANESideo2016hispanic$Weight, na.rm = TRUE))
+
+ANESideo2020white<- ANESideo %>% filter(year == 2020 & Race == 1)
+(weighted.mean(ANESideo2020white$ideomeasure, ANESideo2020white$Weight, na.rm = TRUE))
+ANESideo2020black<- ANESideo %>% filter(year == 2020 & Race == 2)
+(weighted.mean(ANESideo2020black$ideomeasure, ANESideo2020black$Weight, na.rm = TRUE))
+ANESideo2020hispanic<- ANESideo %>% filter(year == 2020 & Hispanic == 1)
+(weighted.mean(ANESideo2020hispanic$ideomeasure, ANESideo2020hispanic$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by gender}
+ANESideo1992male<- ANESideo %>% filter(year == 1992 & Gender == 1)
+(weighted.mean(ANESideo1992male$ideomeasure, ANESideo1992male$Weight, na.rm = TRUE))
+ANESideo1992female<- ANESideo %>% filter(year == 1992 & Gender == 2)
+(weighted.mean(ANESideo1992female$ideomeasure, ANESideo1992female$Weight, na.rm = TRUE))
+
+ANESideo1996male<- ANESideo %>% filter(year == 1996 & Gender == 1)
+(weighted.mean(ANESideo1996male$ideomeasure, ANESideo1996male$Weight, na.rm = TRUE))
+ANESideo1996female<- ANESideo %>% filter(year == 1996 & Gender == 2)
+(weighted.mean(ANESideo1996female$ideomeasure, ANESideo1996female$Weight, na.rm = TRUE))
+
+ANESideo2000male<- ANESideo %>% filter(year == 2000 & Gender == 1)
+(weighted.mean(ANESideo2000male$ideomeasure, ANESideo2000male$Weight, na.rm = TRUE))
+ANESideo2000female<- ANESideo %>% filter(year == 2000 & Gender == 2)
+(weighted.mean(ANESideo2000female$ideomeasure, ANESideo2000female$Weight, na.rm = TRUE))
+
+ANESideo2004male<- ANESideo %>% filter(year == 2004 & Gender == 1)
+(weighted.mean(ANESideo2004male$ideomeasure, ANESideo2004male$Weight, na.rm = TRUE))
+ANESideo2004female<- ANESideo %>% filter(year == 2004 & Gender == 2)
+(weighted.mean(ANESideo2004female$ideomeasure, ANESideo2004female$Weight, na.rm = TRUE))
+
+ANESideo2008male<- ANESideo %>% filter(year == 2008 & Gender == 1)
+(weighted.mean(ANESideo2008male$ideomeasure, ANESideo2008male$Weight, na.rm = TRUE))
+ANESideo2008female<- ANESideo %>% filter(year == 2008 & Gender == 2)
+(weighted.mean(ANESideo2008female$ideomeasure, ANESideo2008female$Weight, na.rm = TRUE))
+
+ANESideo2012male<- ANESideo %>% filter(year == 2012 & Gender == 1)
+(weighted.mean(ANESideo2012male$ideomeasure, ANESideo2012male$Weight, na.rm = TRUE))
+ANESideo2012female<- ANESideo %>% filter(year == 2012 & Gender == 2)
+(weighted.mean(ANESideo2012female$ideomeasure, ANESideo2012female$Weight, na.rm = TRUE))
+
+ANESideo2016male<- ANESideo %>% filter(year == 2016 & Gender == 1)
+(weighted.mean(ANESideo2016male$ideomeasure, ANESideo2016male$Weight, na.rm = TRUE))
+ANESideo2016female<- ANESideo %>% filter(year == 2016 & Gender == 2)
+(weighted.mean(ANESideo2016female$ideomeasure, ANESideo2016female$Weight, na.rm = TRUE))
+
+ANESideo2020male<- ANESideo %>% filter(year == 2020 & Gender == 1)
+(weighted.mean(ANESideo2020male$ideomeasure, ANESideo2020male$Weight, na.rm = TRUE))
+ANESideo2020female<- ANESideo %>% filter(year == 2020 & Gender == 2)
+(weighted.mean(ANESideo2020female$ideomeasure, ANESideo2020female$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by attention}
+ANESideo1992always<- ANESideo %>% filter(year == 1992 & Attention == 1)
+(weighted.mean(ANESideo1992always$ideomeasure, ANESideo1992always$Weight, na.rm = TRUE))
+ANESideo1992half<- ANESideo %>% filter(year == 1992 & Attention == 3)
+(weighted.mean(ANESideo1992half$ideomeasure, ANESideo1992half$Weight, na.rm = TRUE))
+ANESideo1992never<- ANESideo %>% filter(year == 1992 & Attention == 5)
+(weighted.mean(ANESideo1992never$ideomeasure, ANESideo1992never$Weight, na.rm = TRUE))
+
+ANESideo1996always<- ANESideo %>% filter(year == 1996 & Attention == 1)
+(weighted.mean(ANESideo1996always$ideomeasure, ANESideo1996always$Weight, na.rm = TRUE))
+ANESideo1996half<- ANESideo %>% filter(year == 1996 & Attention == 3)
+(weighted.mean(ANESideo1996half$ideomeasure, ANESideo1996half$Weight, na.rm = TRUE))
+ANESideo1996never<- ANESideo %>% filter(year == 1996 & Attention == 5)
+(weighted.mean(ANESideo1996never$ideomeasure, ANESideo1996never$Weight, na.rm = TRUE))
+
+ANESideo2000always<- ANESideo %>% filter(year == 2000 & Attention == 1)
+(weighted.mean(ANESideo2000always$ideomeasure, ANESideo2000always$Weight, na.rm = TRUE))
+ANESideo2000half<- ANESideo %>% filter(year == 2000 & Attention == 3)
+(weighted.mean(ANESideo2000half$ideomeasure, ANESideo2000half$Weight, na.rm = TRUE))
+ANESideo2000never<- ANESideo %>% filter(year == 2000 & Attention == 5)
+(weighted.mean(ANESideo2000never$ideomeasure, ANESideo2000never$Weight, na.rm = TRUE))
+
+ANESideo2004always<- ANESideo %>% filter(year == 2004 & Attention == 1)
+(weighted.mean(ANESideo2004always$ideomeasure, ANESideo2004always$Weight, na.rm = TRUE))
+ANESideo2004half<- ANESideo %>% filter(year == 2004 & Attention == 3)
+(weighted.mean(ANESideo2004half$ideomeasure, ANESideo2004half$Weight, na.rm = TRUE))
+ANESideo2004never<- ANESideo %>% filter(year == 2004 & Attention == 5)
+(weighted.mean(ANESideo2004never$ideomeasure, ANESideo2004never$Weight, na.rm = TRUE))
+
+ANESideo2008always<- ANESideo %>% filter(year == 2008 & (Attention == 1))
+(weighted.mean(ANESideo2008always$ideomeasure, ANESideo2008always$Weight, na.rm = TRUE))
+ANESideo2008half<- ANESideo %>% filter(year == 2008 & Attention == 3)
+(weighted.mean(ANESideo2008half$ideomeasure, ANESideo2008half$Weight, na.rm = TRUE))
+ANESideo2008never<- ANESideo %>% filter(year == 2008 & (Attention == 5))
+(weighted.mean(ANESideo2008never$ideomeasure, ANESideo2008never$Weight, na.rm = TRUE))
+
+ANESideo2012always<- ANESideo %>% filter(year == 2012 & (Attention == 1))
+(weighted.mean(ANESideo2012always$ideomeasure, ANESideo2012always$Weight, na.rm = TRUE))
+ANESideo2012half<- ANESideo %>% filter(year == 2012 & Attention == 3)
+(weighted.mean(ANESideo2012half$ideomeasure, ANESideo2012half$Weight, na.rm = TRUE))
+ANESideo2012never<- ANESideo %>% filter(year == 2012 & (Attention == 5))
+(weighted.mean(ANESideo2012never$ideomeasure, ANESideo2012never$Weight, na.rm = TRUE))
+
+ANESideo2016always<- ANESideo %>% filter(year == 2016 & (Attention == 1))
+(weighted.mean(ANESideo2016always$ideomeasure, ANESideo2016always$Weight, na.rm = TRUE))
+ANESideo2016half<- ANESideo %>% filter(year == 2016 & Attention == 3)
+(weighted.mean(ANESideo2016half$ideomeasure, ANESideo2016half$Weight, na.rm = TRUE))
+ANESideo2016never<- ANESideo %>% filter(year == 2016 & (Attention == 5))
+(weighted.mean(ANESideo2016never$ideomeasure, ANESideo2016never$Weight, na.rm = TRUE))
+
+ANESideo2020always<- ANESideo %>% filter(year == 2020 & (Attention == 1))
+(weighted.mean(ANESideo2020always$ideomeasure, ANESideo2020always$Weight, na.rm = TRUE))
+ANESideo2020half<- ANESideo %>% filter(year == 2020 & Attention == 3)
+(weighted.mean(ANESideo2020half$ideomeasure, ANESideo2020half$Weight, na.rm = TRUE))
+ANESideo2020never<- ANESideo %>% filter(year == 2020 & Attention == 5)
+(weighted.mean(ANESideo2020never$ideomeasure, ANESideo2020never$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by age}
+ANESideo19921729<- ANESideo %>% filter(year == 1992 & Age < 30)
+(weighted.mean(ANESideo19921729$ideomeasure, ANESideo19921729$Weight, na.rm = TRUE))
+ANESideo19923044<- ANESideo %>% filter(year == 1992 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo19923044$ideomeasure, ANESideo19923044$Weight, na.rm = TRUE))
+ANESideo19924564<- ANESideo %>% filter(year == 1992 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo19924564$ideomeasure, ANESideo19924564$Weight, na.rm = TRUE))
+ANESideo199265<- ANESideo %>% filter(year == 1992 & Age > 64)
+(weighted.mean(ANESideo199265$ideomeasure, ANESideo199265$Weight, na.rm = TRUE))
+
+ANESideo19961729<- ANESideo %>% filter(year == 1996 & Age < 30)
+(weighted.mean(ANESideo19961729$ideomeasure, ANESideo19961729$Weight, na.rm = TRUE))
+ANESideo19963044<- ANESideo %>% filter(year == 1996 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo19963044$ideomeasure, ANESideo19963044$Weight, na.rm = TRUE))
+ANESideo19964564<- ANESideo %>% filter(year == 1996 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo19964564$ideomeasure, ANESideo19964564$Weight, na.rm = TRUE))
+ANESideo199665<- ANESideo %>% filter(year == 1996 & Age > 64)
+(weighted.mean(ANESideo199665$ideomeasure, ANESideo199665$Weight, na.rm = TRUE))
+
+ANESideo20001729<- ANESideo %>% filter(year == 2000 & Age < 30)
+(weighted.mean(ANESideo20001729$ideomeasure, ANESideo20001729$Weight, na.rm = TRUE))
+ANESideo20003044<- ANESideo %>% filter(year == 2000 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20003044$ideomeasure, ANESideo20003044$Weight, na.rm = TRUE))
+ANESideo20004564<- ANESideo %>% filter(year == 2000 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20004564$ideomeasure, ANESideo20004564$Weight, na.rm = TRUE))
+ANESideo200065<- ANESideo %>% filter(year == 2000 & Age > 64)
+(weighted.mean(ANESideo200065$ideomeasure, ANESideo200065$Weight, na.rm = TRUE))
+
+ANESideo20041729<- ANESideo %>% filter(year == 2004 & Age < 30)
+(weighted.mean(ANESideo20041729$ideomeasure, ANESideo20041729$Weight, na.rm = TRUE))
+ANESideo20043044<- ANESideo %>% filter(year == 2004 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20043044$ideomeasure, ANESideo20043044$Weight, na.rm = TRUE))
+ANESideo20044564<- ANESideo %>% filter(year == 2004 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20044564$ideomeasure, ANESideo20044564$Weight, na.rm = TRUE))
+ANESideo200465<- ANESideo %>% filter(year == 2004 & Age > 64)
+(weighted.mean(ANESideo200465$ideomeasure, ANESideo200465$Weight, na.rm = TRUE))
+
+ANESideo20081729<- ANESideo %>% filter(year == 2008 & Age < 30)
+(weighted.mean(ANESideo20081729$ideomeasure, ANESideo20081729$Weight, na.rm = TRUE))
+ANESideo20083044<- ANESideo %>% filter(year == 2008 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20083044$ideomeasure, ANESideo20083044$Weight, na.rm = TRUE))
+ANESideo20084564<- ANESideo %>% filter(year == 2008 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20084564$ideomeasure, ANESideo20084564$Weight, na.rm = TRUE))
+ANESideo200865<- ANESideo %>% filter(year == 2008 & Age > 64)
+(weighted.mean(ANESideo200865$ideomeasure, ANESideo200865$Weight, na.rm = TRUE))
+
+ANESideo20121729<- ANESideo %>% filter(year == 2012 & Age < 30)
+(weighted.mean(ANESideo20121729$ideomeasure, ANESideo20121729$Weight, na.rm = TRUE))
+ANESideo20123044<- ANESideo %>% filter(year == 2012 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20123044$ideomeasure, ANESideo20123044$Weight, na.rm = TRUE))
+ANESideo20124564<- ANESideo %>% filter(year == 2012 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20124564$ideomeasure, ANESideo20124564$Weight, na.rm = TRUE))
+ANESideo201265<- ANESideo %>% filter(year == 2012 & Age > 64)
+(weighted.mean(ANESideo201265$ideomeasure, ANESideo201265$Weight, na.rm = TRUE))
+
+ANESideo20161729<- ANESideo %>% filter(year == 2016 & Age < 30)
+(weighted.mean(ANESideo20161729$ideomeasure, ANESideo20161729$Weight, na.rm = TRUE))
+ANESideo20163044<- ANESideo %>% filter(year == 2016 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20163044$ideomeasure, ANESideo20163044$Weight, na.rm = TRUE))
+ANESideo20164564<- ANESideo %>% filter(year == 2016 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20164564$ideomeasure, ANESideo20164564$Weight, na.rm = TRUE))
+ANESideo201665<- ANESideo %>% filter(year == 2016 & Age > 64)
+(weighted.mean(ANESideo201665$ideomeasure, ANESideo201665$Weight, na.rm = TRUE))
+
+ANESideo20201729<- ANESideo %>% filter(year == 2020 & Age < 30)
+(weighted.mean(ANESideo20201729$ideomeasure, ANESideo20201729$Weight, na.rm = TRUE))
+ANESideo20203044<- ANESideo %>% filter(year == 2020 & Age < 45 & Age > 29)
+(weighted.mean(ANESideo20203044$ideomeasure, ANESideo20203044$Weight, na.rm = TRUE))
+ANESideo20204564<- ANESideo %>% filter(year == 2020 & Age > 44 & Age < 65)
+(weighted.mean(ANESideo20204564$ideomeasure, ANESideo20204564$Weight, na.rm = TRUE))
+ANESideo202065<- ANESideo %>% filter(year == 2020 & Age > 64)
+(weighted.mean(ANESideo202065$ideomeasure, ANESideo202065$Weight, na.rm = TRUE))
+```
+
+```{r ideo polarization by education}
+ANESideo1992hsorless<- ANESideo %>% filter(year == 1992 & Education < 3)
+(weighted.mean(ANESideo1992hsorless$ideomeasure, ANESideo1992hsorless$Weight, na.rm = TRUE))
+ANESideo1992college<- ANESideo %>% filter(year == 1992 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo1992college$ideomeasure, ANESideo1992college$Weight, na.rm = TRUE))
+ANESideo1992advanced<- ANESideo %>% filter(year == 1992 & Education == 5)
+(weighted.mean(ANESideo1992advanced$ideomeasure, ANESideo1992advanced$Weight, na.rm = TRUE))
+
+ANESideo1996hsorless<- ANESideo %>% filter(year == 1996 & Education < 3)
+(weighted.mean(ANESideo1996hsorless$ideomeasure, ANESideo1996hsorless$Weight, na.rm = TRUE))
+ANESideo1996college<- ANESideo %>% filter(year == 1996 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo1996college$ideomeasure, ANESideo1996college$Weight, na.rm = TRUE))
+ANESideo1996advanced<- ANESideo %>% filter(year == 1996 & Education == 5)
+(weighted.mean(ANESideo1996advanced$ideomeasure, ANESideo1996advanced$Weight, na.rm = TRUE))
+
+ANESideo2000hsorless<- ANESideo %>% filter(year == 2000 & Education < 3)
+(weighted.mean(ANESideo2000hsorless$ideomeasure, ANESideo2000hsorless$Weight, na.rm = TRUE))
+ANESideo2000college<- ANESideo %>% filter(year == 2000 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2000college$ideomeasure, ANESideo2000college$Weight, na.rm = TRUE))
+ANESideo2000advanced<- ANESideo %>% filter(year == 2000 & Education == 5)
+(weighted.mean(ANESideo2000advanced$ideomeasure, ANESideo2000advanced$Weight, na.rm = TRUE))
+
+ANESideo2004hsorless<- ANESideo %>% filter(year == 2004 & Education < 3)
+(weighted.mean(ANESideo2004hsorless$ideomeasure, ANESideo2004hsorless$Weight, na.rm = TRUE))
+ANESideo2004college<- ANESideo %>% filter(year == 2004 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2004college$ideomeasure, ANESideo2004college$Weight, na.rm = TRUE))
+ANESideo2004advanced<- ANESideo %>% filter(year == 2004 & Education == 5)
+(weighted.mean(ANESideo2004advanced$ideomeasure, ANESideo2004advanced$Weight, na.rm = TRUE))
+
+ANESideo2008hsorless<- ANESideo %>% filter(year == 2008 & Education < 3)
+(weighted.mean(ANESideo2008hsorless$ideomeasure, ANESideo2008hsorless$Weight, na.rm = TRUE))
+ANESideo2008college<- ANESideo %>% filter(year == 2008 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2008college$ideomeasure, ANESideo2008college$Weight, na.rm = TRUE))
+ANESideo2008advanced<- ANESideo %>% filter(year == 2008 & Education == 5)
+(weighted.mean(ANESideo2008advanced$ideomeasure, ANESideo2008advanced$Weight, na.rm = TRUE))
+
+ANESideo2012hsorless<- ANESideo %>% filter(year == 2012 & Education < 3)
+(weighted.mean(ANESideo2012hsorless$ideomeasure, ANESideo2012hsorless$Weight, na.rm = TRUE))
+ANESideo2012college<- ANESideo %>% filter(year == 2012 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2012college$ideomeasure, ANESideo2012college$Weight, na.rm = TRUE))
+ANESideo2012advanced<- ANESideo %>% filter(year == 2012 & Education == 5)
+(weighted.mean(ANESideo2012advanced$ideomeasure, ANESideo2012advanced$Weight, na.rm = TRUE))
+
+ANESideo2016hsorless<- ANESideo %>% filter(year == 2016 & Education < 3)
+(weighted.mean(ANESideo2016hsorless$ideomeasure, ANESideo2016hsorless$Weight, na.rm = TRUE))
+ANESideo2016college<- ANESideo %>% filter(year == 2016 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2016college$ideomeasure, ANESideo2016college$Weight, na.rm = TRUE))
+ANESideo2016advanced<- ANESideo %>% filter(year == 2016 & Education == 5)
+(weighted.mean(ANESideo2016advanced$ideomeasure, ANESideo2016advanced$Weight, na.rm = TRUE))
+
+ANESideo2020hsorless<- ANESideo %>% filter(year == 2020 & Education < 3)
+(weighted.mean(ANESideo2020hsorless$ideomeasure, ANESideo2020hsorless$Weight, na.rm = TRUE))
+ANESideo2020college<- ANESideo %>% filter(year == 2020 & Education > 2 & Education < 5)
+(weighted.mean(ANESideo2020college$ideomeasure, ANESideo2020college$Weight, na.rm = TRUE))
+ANESideo2020advanced<- ANESideo %>% filter(year == 2020 & Education == 5)
+(weighted.mean(ANESideo2020advanced$ideomeasure, ANESideo2020advanced$Weight, na.rm = TRUE))
+```
+
+```{r ideological polarization regression}
+#need to scale before doing this
+ANESregideo <- ANESideo
+ANESregideo$Gender <- as.character(ANESregideo$Gender)
+ANESregideo$Gender[ANESregideo$Gender==1]<-"male"
+ANESregideo$Gender[ANESregideo$Gender==2]<-"female"
+ANESregideo$Gender[ANESregideo$Gender==0]<- NA
+ANESregideo$Race <- as.character(ANESregideo$Race)
+ANESregideo$Race[ANESregideo$Race==1]<-"white"
+ANESregideo$Race[ANESregideo$Race==2]<-"black"
+ANESregideo$Attention <- as.character(ANESregideo$Attention)
+ANESregideo$Attention[ANESregideo$Attention==1]<-"always/most"
+ANESregideo$Attention[ANESregideo$Attention==3]<-"half"
+ANESregideo$Attention[ANESregideo$Attention==5]<-"some/never"
+ANESregideo$Hispanic <- as.character(ANESregideo$Hispanic)
+ANESregideo$Hispanic[ANESregideo$Hispanic==2]<-"nonhispanic"
+ANESregideo$Hispanic[ANESregideo$Hispanic==1]<-"hispanic"
+ANESregideo$Hispanic[ANESregideo$Hispanic==0]<- NA
+ANESregideo$Party <- as.character(ANESregideo$Party)
+ANESregideo$Party[ANESregideo$Party==1]<-"democrat"
+ANESregideo$Party[ANESregideo$Party==2]<-"republican"
+ANESregideo$Party[ANESregideo$Party==3]<-"independent"
+ANESregideo$Education <- as.character(ANESregideo$Education)
+ANESregideo$Education[ANESregideo$Education==1]<-"nohs"
+ANESregideo$Education[ANESregideo$Education==2]<-"hs"
+ANESregideo$Education[ANESregideo$Education==3]<-"somecollege"
+ANESregideo$Education[ANESregideo$Education==4]<-"bachelors"
+ANESregideo$Education[ANESregideo$Education==5]<-"advanceddegree"
+ANESregideo$ideomeasure<-(100/7)*(ANESregideo$ideomeasure)
+ANES_we2 <- ANESregideo %>% as_survey(weights = c(Weight))
+model <- svyglm(ideomeasure~Attention + Education + Gender + Age + Race + Hispanic + Party + year, design = ANES_we2)
+summary(model)
+```
+
+```{r healthcare ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideohealthcare <-ANES[complete.cases(ANES$Healthcare7pt),]
+
+ANESideohealthcare1992dem<- ANESideohealthcare %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideohealthcare1992dem$Healthcare7pt, ANESideohealthcare1992dem$Weight, na.rm = TRUE))
+ANESideohealthcare1992rep<- ANESideohealthcare %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideohealthcare1992rep$Healthcare7pt, ANESideohealthcare1992rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare1996dem<- ANESideohealthcare %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideohealthcare1996dem$Healthcare7pt, ANESideohealthcare1996dem$Weight, na.rm = TRUE))
+ANESideohealthcare1996rep<- ANESideohealthcare %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideohealthcare1996rep$Healthcare7pt, ANESideohealthcare1996rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2000dem<- ANESideohealthcare %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideohealthcare2000dem$Healthcare7pt, ANESideohealthcare2000dem$Weight, na.rm = TRUE))
+ANESideohealthcare2000rep<- ANESideohealthcare %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideohealthcare2000rep$Healthcare7pt, ANESideohealthcare2000rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2004dem<- ANESideohealthcare %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideohealthcare2004dem$Healthcare7pt, ANESideohealthcare2004dem$Weight, na.rm = TRUE))
+ANESideohealthcare2004rep<- ANESideohealthcare %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideohealthcare2004rep$Healthcare7pt, ANESideohealthcare2004rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2008dem<- ANESideohealthcare %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideohealthcare2008dem$Healthcare7pt, ANESideohealthcare2008dem$Weight, na.rm = TRUE))
+ANESideohealthcare2008rep<- ANESideohealthcare %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideohealthcare2008rep$Healthcare7pt, ANESideohealthcare2008rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2012dem<- ANESideohealthcare %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideohealthcare2012dem$Healthcare7pt, ANESideohealthcare2012dem$Weight, na.rm = TRUE))
+ANESideohealthcare2012rep<- ANESideohealthcare %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideohealthcare2012rep$Healthcare7pt, ANESideohealthcare2012rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2016dem<- ANESideohealthcare %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideohealthcare2016dem$Healthcare7pt, ANESideohealthcare2016dem$Weight, na.rm = TRUE))
+ANESideohealthcare2016rep<- ANESideohealthcare %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideohealthcare2016rep$Healthcare7pt, ANESideohealthcare2016rep$Weight, na.rm = TRUE))
+
+ANESideohealthcare2020dem<- ANESideohealthcare %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideohealthcare2020dem$Healthcare7pt, ANESideohealthcare2020dem$Weight, na.rm = TRUE))
+ANESideohealthcare2020rep<- ANESideohealthcare %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideohealthcare2020rep$Healthcare7pt, ANESideohealthcare2020rep$Weight, na.rm = TRUE))
+```
+
+```{r spending ideo}
+attach(ANES)
+options(messages = - 1) 
+
+ANESideospending <-ANES[complete.cases(ANES$Spending7pt),]
+ANESideospending1992dem<- ANESideospending %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideospending1992dem$Spending7pt, ANESideospending1992dem$Weight, na.rm = TRUE))
+ANESideospending1992rep<- ANESideospending %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideospending1992rep$Spending7pt, ANESideospending1992rep$Weight, na.rm = TRUE))
+
+ANESideospending1996dem<- ANESideospending %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideospending1996dem$Spending7pt, ANESideospending1996dem$Weight, na.rm = TRUE))
+ANESideospending1996rep<- ANESideospending %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideospending1996rep$Spending7pt, ANESideospending1996rep$Weight, na.rm = TRUE))
+
+ANESideospending2000dem<- ANESideospending %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideospending2000dem$Spending7pt, ANESideospending2000dem$Weight, na.rm = TRUE))
+
+ANESideospending2000rep<- ANESideospending %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideospending2000rep$Spending7pt, ANESideospending2000rep$Weight, na.rm = TRUE))
+
+ANESideospending2004dem<- ANESideospending %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideospending2004dem$Spending7pt, ANESideospending2004dem$Weight, na.rm = TRUE))
+ANESideospending2004rep<- ANESideospending %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideospending2004rep$Spending7pt, ANESideospending2004rep$Weight, na.rm = TRUE))
+
+ANESideospending2008dem<- ANESideospending %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideospending2008dem$Spending7pt, ANESideospending2008dem$Weight, na.rm = TRUE))
+ANESideospending2008rep<- ANESideospending %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideospending2008rep$Spending7pt, ANESideospending2008rep$Weight, na.rm = TRUE))
+
+ANESideospending2012dem<- ANESideospending %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideospending2012dem$Spending7pt, ANESideospending2012dem$Weight, na.rm = TRUE))
+ANESideospending2012rep<- ANESideospending %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideospending2012rep$Spending7pt, ANESideospending2012rep$Weight, na.rm = TRUE))
+
+ANESideospending2016dem<- ANESideospending %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideospending2016dem$Spending7pt, ANESideospending2016dem$Weight, na.rm = TRUE))
+ANESideospending2016rep<- ANESideospending %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideospending2016rep$Spending7pt, ANESideospending2016rep$Weight, na.rm = TRUE))
+
+ANESideospending2020dem<- ANESideospending %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideospending2020dem$Spending7pt, ANESideospending2020dem$Weight, na.rm = TRUE))
+ANESideospending2020rep<- ANESideospending %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideospending2020rep$Spending7pt, ANESideospending2020rep$Weight, na.rm = TRUE))
+```
+
+```{r aid to black ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideoblacks <-ANES[complete.cases(ANES$Blacks7pt),]
+
+ANESideoblacks1992dem<- ANESideoblacks %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideoblacks1992dem$Blacks7pt, ANESideoblacks1992dem$Weight, na.rm = TRUE))
+ANESideoblacks1992rep<- ANESideoblacks %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideoblacks1992rep$Blacks7pt, ANESideoblacks1992rep$Weight, na.rm = TRUE))
+
+ANESideoblacks1996dem<- ANESideoblacks %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideoblacks1996dem$Blacks7pt, ANESideoblacks1996dem$Weight, na.rm = TRUE))
+ANESideoblacks1996rep<- ANESideoblacks %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideoblacks1996rep$Blacks7pt, ANESideoblacks1996rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2000dem<- ANESideoblacks %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideoblacks2000dem$Blacks7pt, ANESideoblacks2000dem$Weight, na.rm = TRUE))
+
+ANESideoblacks2000rep<- ANESideoblacks %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideoblacks2000rep$Blacks7pt, ANESideoblacks2000rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2004dem<- ANESideoblacks %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideoblacks2004dem$Blacks7pt, ANESideoblacks2004dem$Weight, na.rm = TRUE))
+ANESideoblacks2004rep<- ANESideoblacks %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideoblacks2004rep$Blacks7pt, ANESideoblacks2004rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2008dem<- ANESideoblacks %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideoblacks2008dem$Blacks7pt, ANESideoblacks2008dem$Weight, na.rm = TRUE))
+ANESideoblacks2008rep<- ANESideoblacks %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideoblacks2008rep$Blacks7pt, ANESideoblacks2008rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2012dem<- ANESideoblacks %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideoblacks2012dem$Blacks7pt, ANESideoblacks2012dem$Weight, na.rm = TRUE))
+ANESideoblacks2012rep<- ANESideoblacks %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideoblacks2012rep$Blacks7pt, ANESideoblacks2012rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2016dem<- ANESideoblacks %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideoblacks2016dem$Blacks7pt, ANESideoblacks2016dem$Weight, na.rm = TRUE))
+ANESideoblacks2016rep<- ANESideoblacks %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideoblacks2016rep$Blacks7pt, ANESideoblacks2016rep$Weight, na.rm = TRUE))
+
+ANESideoblacks2020dem<- ANESideoblacks %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideoblacks2020dem$Blacks7pt, ANESideoblacks2020dem$Weight, na.rm = TRUE))
+ANESideoblacks2020rep<- ANESideoblacks %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideoblacks2020rep$Blacks7pt, ANESideoblacks2020rep$Weight, na.rm = TRUE))
+```
+
+```{r abortion ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideoabortion <-ANES[complete.cases(ANES$Abortion4pt),]
+
+ANESideoabortion1992dem<- ANESideoabortion %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideoabortion1992dem$Abortion4pt, ANESideoabortion1992dem$Weight, na.rm = TRUE))
+ANESideoabortion1992rep<- ANESideoabortion %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideoabortion1992rep$Abortion4pt, ANESideoabortion1992rep$Weight, na.rm = TRUE))
+
+ANESideoabortion1996dem<- ANESideoabortion %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideoabortion1996dem$Abortion4pt, ANESideoabortion1996dem$Weight, na.rm = TRUE))
+ANESideoabortion1996rep<- ANESideoabortion %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideoabortion1996rep$Abortion4pt, ANESideoabortion1996rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2000dem<- ANESideoabortion %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideoabortion2000dem$Abortion4pt, ANESideoabortion2000dem$Weight, na.rm = TRUE))
+
+ANESideoabortion2000rep<- ANESideoabortion %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideoabortion2000rep$Abortion4pt, ANESideoabortion2000rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2004dem<- ANESideoabortion %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideoabortion2004dem$Abortion4pt, ANESideoabortion2004dem$Weight, na.rm = TRUE))
+ANESideoabortion2004rep<- ANESideoabortion %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideoabortion2004rep$Abortion4pt, ANESideoabortion2004rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2008dem<- ANESideoabortion %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideoabortion2008dem$Abortion4pt, ANESideoabortion2008dem$Weight, na.rm = TRUE))
+ANESideoabortion2008rep<- ANESideoabortion %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideoabortion2008rep$Abortion4pt, ANESideoabortion2008rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2012dem<- ANESideoabortion %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideoabortion2012dem$Abortion4pt, ANESideoabortion2012dem$Weight, na.rm = TRUE))
+ANESideoabortion2012rep<- ANESideoabortion %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideoabortion2012rep$Abortion4pt, ANESideoabortion2012rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2016dem<- ANESideoabortion %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideoabortion2016dem$Abortion4pt, ANESideoabortion2016dem$Weight, na.rm = TRUE))
+ANESideoabortion2016rep<- ANESideoabortion %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideoabortion2016rep$Abortion4pt, ANESideoabortion2016rep$Weight, na.rm = TRUE))
+
+ANESideoabortion2020dem<- ANESideoabortion %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideoabortion2020dem$Abortion4pt, ANESideoabortion2020dem$Weight, na.rm = TRUE))
+ANESideoabortion2020rep<- ANESideoabortion %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideoabortion2020rep$Abortion4pt, ANESideoabortion2020rep$Weight, na.rm = TRUE))
+```
+
+```{r jobs ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideojobs <-ANES[complete.cases(ANES$Jobs7pt),]
+
+ANESideojobs1992dem<- ANESideojobs %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideojobs1992dem$Jobs7pt, ANESideojobs1992dem$Weight, na.rm = TRUE))
+ANESideojobs1992rep<- ANESideojobs %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideojobs1992rep$Jobs7pt, ANESideojobs1992rep$Weight, na.rm = TRUE))
+
+ANESideojobs1996dem<- ANESideojobs %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideojobs1996dem$Jobs7pt, ANESideojobs1996dem$Weight, na.rm = TRUE))
+ANESideojobs1996rep<- ANESideojobs %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideojobs1996rep$Jobs7pt, ANESideojobs1996rep$Weight, na.rm = TRUE))
+
+ANESideojobs2000dem<- ANESideojobs %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideojobs2000dem$Jobs7pt, ANESideojobs2000dem$Weight, na.rm = TRUE))
+
+ANESideojobs2000rep<- ANESideojobs %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideojobs2000rep$Jobs7pt, ANESideojobs2000rep$Weight, na.rm = TRUE))
+
+ANESideojobs2004dem<- ANESideojobs %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideojobs2004dem$Jobs7pt, ANESideojobs2004dem$Weight, na.rm = TRUE))
+ANESideojobs2004rep<- ANESideojobs %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideojobs2004rep$Jobs7pt, ANESideojobs2004rep$Weight, na.rm = TRUE))
+
+ANESideojobs2008dem<- ANESideojobs %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideojobs2008dem$Jobs7pt, ANESideojobs2008dem$Weight, na.rm = TRUE))
+ANESideojobs2008rep<- ANESideojobs %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideojobs2008rep$Jobs7pt, ANESideojobs2008rep$Weight, na.rm = TRUE))
+
+ANESideojobs2012dem<- ANESideojobs %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideojobs2012dem$Jobs7pt, ANESideojobs2012dem$Weight, na.rm = TRUE))
+ANESideojobs2012rep<- ANESideojobs %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideojobs2012rep$Jobs7pt, ANESideojobs2012rep$Weight, na.rm = TRUE))
+
+ANESideojobs2016dem<- ANESideojobs %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideojobs2016dem$Jobs7pt, ANESideojobs2016dem$Weight, na.rm = TRUE))
+ANESideojobs2016rep<- ANESideojobs %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideojobs2016rep$Jobs7pt, ANESideojobs2016rep$Weight, na.rm = TRUE))
+
+ANESideojobs2020dem<- ANESideojobs %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideojobs2020dem$Jobs7pt, ANESideojobs2020dem$Weight, na.rm = TRUE))
+ANESideojobs2020rep<- ANESideojobs %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideojobs2020rep$Jobs7pt, ANESideojobs2020rep$Weight, na.rm = TRUE))
+```
+
+```{r defense ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideodefense <-ANES[complete.cases(ANES$Defense7pt),]
+
+ANESideodefense1992dem<- ANESideodefense %>% filter(year == 1992 & Party == 1)
+(weighted.mean(ANESideodefense1992dem$Defense7pt, ANESideodefense1992dem$Weight, na.rm = TRUE))
+ANESideodefense1992rep<- ANESideodefense %>% filter(year == 1992 & Party == 2)
+(weighted.mean(ANESideodefense1992rep$Defense7pt, ANESideodefense1992rep$Weight, na.rm = TRUE))
+
+ANESideodefense1996dem<- ANESideodefense %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideodefense1996dem$Defense7pt, ANESideodefense1996dem$Weight, na.rm = TRUE))
+ANESideodefense1996rep<- ANESideodefense %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideodefense1996rep$Defense7pt, ANESideodefense1996rep$Weight, na.rm = TRUE))
+
+ANESideodefense2000dem<- ANESideodefense %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideodefense2000dem$Defense7pt, ANESideodefense2000dem$Weight, na.rm = TRUE))
+
+ANESideodefense2000rep<- ANESideodefense %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideodefense2000rep$Defense7pt, ANESideodefense2000rep$Weight, na.rm = TRUE))
+
+ANESideodefense2004dem<- ANESideodefense %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideodefense2004dem$Defense7pt, ANESideodefense2004dem$Weight, na.rm = TRUE))
+ANESideodefense2004rep<- ANESideodefense %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideodefense2004rep$Defense7pt, ANESideodefense2004rep$Weight, na.rm = TRUE))
+
+ANESideodefense2008dem<- ANESideodefense %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideodefense2008dem$Defense7pt, ANESideodefense2008dem$Weight, na.rm = TRUE))
+ANESideodefense2008rep<- ANESideodefense %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideodefense2008rep$Defense7pt, ANESideodefense2008rep$Weight, na.rm = TRUE))
+
+ANESideodefense2012dem<- ANESideodefense %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideodefense2012dem$Defense7pt, ANESideodefense2012dem$Weight, na.rm = TRUE))
+ANESideodefense2012rep<- ANESideodefense %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideodefense2012rep$Defense7pt, ANESideodefense2012rep$Weight, na.rm = TRUE))
+
+ANESideodefense2016dem<- ANESideodefense %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideodefense2016dem$Defense7pt, ANESideodefense2016dem$Weight, na.rm = TRUE))
+ANESideodefense2016rep<- ANESideodefense %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideodefense2016rep$Defense7pt, ANESideodefense2016rep$Weight, na.rm = TRUE))
+
+ANESideodefense2020dem<- ANESideodefense %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideodefense2020dem$Defense7pt, ANESideodefense2020dem$Weight, na.rm = TRUE))
+ANESideodefense2020rep<- ANESideodefense %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideodefense2020rep$Defense7pt, ANESideodefense2020rep$Weight, na.rm = TRUE))
+```
+
+```{r environment ideo}
+attach(ANES)
+options(messages = - 1) 
+ANESideoenvironment <-ANESenvironment[complete.cases(ANESenvironment$Environment7pt),]
+
+ANESideoenvironment1996dem<- ANESideoenvironment %>% filter(year == 1996 & Party == 1)
+(weighted.mean(ANESideoenvironment1996dem$Environment7pt, ANESideoenvironment1996dem$Weight, na.rm = TRUE))
+ANESideoenvironment1996rep<- ANESideoenvironment %>% filter(year == 1996 & Party == 2)
+(weighted.mean(ANESideoenvironment1996rep$Environment7pt, ANESideoenvironment1996rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2000dem<- ANESideoenvironment %>% filter(year == 2000 & Party == 1)
+(weighted.mean(ANESideoenvironment2000dem$Environment7pt, ANESideoenvironment2000dem$Weight, na.rm = TRUE))
+
+ANESideoenvironment2000rep<- ANESideoenvironment %>% filter(year == 2000 & Party == 2)
+(weighted.mean(ANESideoenvironment2000rep$Environment7pt, ANESideoenvironment2000rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2004dem<- ANESideoenvironment %>% filter(year == 2004 & Party == 1)
+(weighted.mean(ANESideoenvironment2004dem$Environment7pt, ANESideoenvironment2004dem$Weight, na.rm = TRUE))
+ANESideoenvironment2004rep<- ANESideoenvironment %>% filter(year == 2004 & Party == 2)
+(weighted.mean(ANESideoenvironment2004rep$Environment7pt, ANESideoenvironment2004rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2008dem<- ANESideoenvironment %>% filter(year == 2008 & Party == 1)
+(weighted.mean(ANESideoenvironment2008dem$Environment7pt, ANESideoenvironment2008dem$Weight, na.rm = TRUE))
+ANESideoenvironment2008rep<- ANESideoenvironment %>% filter(year == 2008 & Party == 2)
+(weighted.mean(ANESideoenvironment2008rep$Environment7pt, ANESideoenvironment2008rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2012dem<- ANESideoenvironment %>% filter(year == 2012 & Party == 1)
+(weighted.mean(ANESideoenvironment2012dem$Environment7pt, ANESideoenvironment2012dem$Weight, na.rm = TRUE))
+ANESideoenvironment2012rep<- ANESideoenvironment %>% filter(year == 2012 & Party == 2)
+(weighted.mean(ANESideoenvironment2012rep$Environment7pt, ANESideoenvironment2012rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2016dem<- ANESideoenvironment %>% filter(year == 2016 & Party == 1)
+(weighted.mean(ANESideoenvironment2016dem$Environment7pt, ANESideoenvironment2016dem$Weight, na.rm = TRUE))
+ANESideoenvironment2016rep<- ANESideoenvironment %>% filter(year == 2016 & Party == 2)
+(weighted.mean(ANESideoenvironment2016rep$Environment7pt, ANESideoenvironment2016rep$Weight, na.rm = TRUE))
+
+ANESideoenvironment2020dem<- ANESideoenvironment %>% filter(year == 2020 & Party == 1)
+(weighted.mean(ANESideoenvironment2020dem$Environment7pt, ANESideoenvironment2020dem$Weight, na.rm = TRUE))
+ANESideoenvironment2020rep<- ANESideoenvironment %>% filter(year == 2020 & Party == 2)
+(weighted.mean(ANESideoenvironment2020rep$Environment7pt, ANESideoenvironment2020rep$Weight, na.rm = TRUE))
+```
+
+```{r DW senate manipulation}
+senateDW$congress <- (117-senateDW$congress)
+senateDW$congress <- 2022 - (2*senateDW$congress) 
+senateDW$nominate_dim1 <-(senateDW$nominate_dim1+1)*50
+```
+
+```{r DW house manipulation}
+houseDW$congress <- (117-houseDW$congress)
+houseDW$congress <- 2022 - (2*houseDW$congress) 
+houseDW$nominate_dim1 <-(houseDW$nominate_dim1+1)*50
+```
+
+```{r DW senate analysis}
+senateDW1992dem<- senateDW %>% filter(congress == 1992 &  party_code == "Democrat")
+mean(senateDW1992dem$nominate_dim1)
+senateDW1992rep<- senateDW %>% filter(congress == 1992 & party_code == "Republican")
+mean(senateDW1992rep$nominate_dim1)
+
+senateDW1994dem<- senateDW %>% filter(congress == 1994 &  party_code == "Democrat")
+mean(senateDW1994dem$nominate_dim1)
+senateDW1994rep<- senateDW %>% filter(congress == 1994 & party_code == "Republican")
+mean(senateDW1994rep$nominate_dim1)
+
+senateDW1996dem<- senateDW %>% filter(congress == 1996 &  party_code == "Democrat")
+mean(senateDW1996dem$nominate_dim1)
+senateDW1996rep<- senateDW %>% filter(congress == 1996 & party_code == "Republican")
+mean(senateDW1996rep$nominate_dim1)
+
+senateDW1998dem<- senateDW %>% filter(congress == 1998 &  party_code == "Democrat")
+mean(senateDW1998dem$nominate_dim1)
+senateDW1998rep<- senateDW %>% filter(congress == 1998 & party_code == "Republican")
+mean(senateDW1998rep$nominate_dim1)
+
+senateDW2000dem<- senateDW %>% filter(congress == 2000 &  party_code == "Democrat")
+mean(senateDW2000dem$nominate_dim1)
+senateDW2000rep<- senateDW %>% filter(congress == 2000 & party_code == "Republican")
+mean(senateDW2000rep$nominate_dim1)
+
+senateDW2002dem<- senateDW %>% filter(congress == 2002 &  party_code == "Democrat")
+mean(senateDW2002dem$nominate_dim1)
+senateDW2002rep<- senateDW %>% filter(congress == 2002 & party_code == "Republican")
+mean(senateDW2002rep$nominate_dim1)
+
+senateDW2004dem<- senateDW %>% filter(congress == 2004 &  party_code == "Democrat")
+mean(senateDW2004dem$nominate_dim1)
+senateDW2004rep<- senateDW %>% filter(congress == 2004 & party_code == "Republican")
+mean(senateDW2004rep$nominate_dim1)
+
+senateDW2006dem<- senateDW %>% filter(congress == 2006 &  party_code == "Democrat")
+mean(senateDW2006dem$nominate_dim1)
+senateDW2006rep<- senateDW %>% filter(congress == 2006 & party_code == "Republican")
+mean(senateDW2006rep$nominate_dim1)
+
+senateDW2008dem<- senateDW %>% filter(congress == 2008 &  party_code == "Democrat")
+mean(senateDW2008dem$nominate_dim1)
+senateDW2008rep<- senateDW %>% filter(congress == 2008 & party_code == "Republican")
+mean(senateDW2008rep$nominate_dim1)
+
+senateDW2010dem<- senateDW %>% filter(congress == 2010 &  party_code == "Democrat")
+mean(senateDW2010dem$nominate_dim1)
+senateDW2010rep<- senateDW %>% filter(congress == 2010 & party_code == "Republican")
+mean(senateDW2010rep$nominate_dim1)
+
+senateDW2012dem<- senateDW %>% filter(congress == 2012 &  party_code == "Democrat")
+mean(senateDW2012dem$nominate_dim1)
+senateDW2012rep<- senateDW %>% filter(congress == 2012 & party_code == "Republican")
+mean(senateDW2012rep$nominate_dim1)
+
+senateDW2014dem<- senateDW %>% filter(congress == 2014 &  party_code == "Democrat")
+mean(senateDW2014dem$nominate_dim1)
+senateDW2014rep<- senateDW %>% filter(congress == 2014 & party_code == "Republican")
+mean(senateDW2014rep$nominate_dim1)
+
+senateDW2016dem<- senateDW %>% filter(congress == 2016 &  party_code == "Democrat")
+mean(senateDW2016dem$nominate_dim1)
+senateDW2016rep<- senateDW %>% filter(congress == 2016 & party_code == "Republican")
+mean(senateDW2016rep$nominate_dim1)
+
+senateDW2018dem<- senateDW %>% filter(congress == 2018 &  party_code == "Democrat")
+mean(senateDW2018dem$nominate_dim1)
+senateDW2018rep<- senateDW %>% filter(congress == 2018 & party_code == "Republican")
+mean(senateDW2018rep$nominate_dim1)
+
+senateDW2020dem<- senateDW %>% filter(congress == 2020 &  party_code == "Democrat")
+mean(senateDW2020dem$nominate_dim1)
+senateDW2020rep<- senateDW %>% filter(congress == 2020 & party_code == "Republican")
+mean(senateDW2020rep$nominate_dim1)
+
+senateDW2022dem<- senateDW %>% filter(congress == 2022 &  party_code == "Democrat")
+mean(senateDW2022dem$nominate_dim1)
+senateDW2022rep<- senateDW %>% filter(congress == 2022 & party_code == "Republican")
+mean(senateDW2022rep$nominate_dim1)
+```
+
+```{r DW house analysis}
+houseDW1992dem<- houseDW %>% filter(congress == 1992 &  party_code == "Democrat")
+mean(houseDW1992dem$nominate_dim1, na.rm=TRUE)
+houseDW1992rep<- houseDW %>% filter(congress == 1992 & party_code == "Republican")
+mean(houseDW1992rep$nominate_dim1, na.rm=TRUE)
+
+houseDW1994dem<- houseDW %>% filter(congress == 1994 &  party_code == "Democrat")
+mean(houseDW1994dem$nominate_dim1, na.rm=TRUE)
+houseDW1994rep<- houseDW %>% filter(congress == 1994 & party_code == "Republican")
+mean(houseDW1994rep$nominate_dim1, na.rm=TRUE)
+
+houseDW1996dem<- houseDW %>% filter(congress == 1996 &  party_code == "Democrat")
+mean(houseDW1996dem$nominate_dim1, na.rm=TRUE)
+houseDW1996rep<- houseDW %>% filter(congress == 1996 & party_code == "Republican")
+mean(houseDW1996rep$nominate_dim1, na.rm=TRUE)
+
+houseDW1998dem<- houseDW %>% filter(congress == 1998 &  party_code == "Democrat")
+mean(houseDW1998dem$nominate_dim1, na.rm=TRUE)
+houseDW1998rep<- houseDW %>% filter(congress == 1998 & party_code == "Republican")
+mean(houseDW1998rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2000dem<- houseDW %>% filter(congress == 2000 &  party_code == "Democrat")
+mean(houseDW2000dem$nominate_dim1, na.rm=TRUE)
+houseDW2000rep<- houseDW %>% filter(congress == 2000 & party_code == "Republican")
+mean(houseDW2000rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2002dem<- houseDW %>% filter(congress == 2002 &  party_code == "Democrat")
+mean(houseDW2002dem$nominate_dim1, na.rm=TRUE)
+houseDW2002rep<- houseDW %>% filter(congress == 2002 & party_code == "Republican")
+mean(houseDW2002rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2004dem<- houseDW %>% filter(congress == 2004 &  party_code == "Democrat")
+mean(houseDW2004dem$nominate_dim1, na.rm=TRUE)
+houseDW2004rep<- houseDW %>% filter(congress == 2004 & party_code == "Republican")
+mean(houseDW2004rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2006dem<- houseDW %>% filter(congress == 2006 &  party_code == "Democrat")
+mean(houseDW2006dem$nominate_dim1, na.rm=TRUE)
+houseDW2006rep<- houseDW %>% filter(congress == 2006 & party_code == "Republican")
+mean(houseDW2006rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2008dem<- houseDW %>% filter(congress == 2008 &  party_code == "Democrat")
+mean(houseDW2008dem$nominate_dim1, na.rm=TRUE)
+houseDW2008rep<- houseDW %>% filter(congress == 2008 & party_code == "Republican")
+mean(houseDW2008rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2010dem<- houseDW %>% filter(congress == 2010 &  party_code == "Democrat")
+mean(houseDW2010dem$nominate_dim1, na.rm=TRUE)
+houseDW2010rep<- houseDW %>% filter(congress == 2010 & party_code == "Republican")
+mean(houseDW2010rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2012dem<- houseDW %>% filter(congress == 2012 &  party_code == "Democrat")
+mean(houseDW2012dem$nominate_dim1, na.rm=TRUE)
+houseDW2012rep<- houseDW %>% filter(congress == 2012 & party_code == "Republican")
+mean(houseDW2012rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2014dem<- houseDW %>% filter(congress == 2014 &  party_code == "Democrat")
+mean(houseDW2014dem$nominate_dim1, na.rm=TRUE)
+houseDW2014rep<- houseDW %>% filter(congress == 2014 & party_code == "Republican")
+mean(houseDW2014rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2016dem<- houseDW %>% filter(congress == 2016 &  party_code == "Democrat")
+mean(houseDW2016dem$nominate_dim1, na.rm=TRUE)
+houseDW2016rep<- houseDW %>% filter(congress == 2016 & party_code == "Republican")
+mean(houseDW2016rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2018dem<- houseDW %>% filter(congress == 2018 &  party_code == "Democrat")
+mean(houseDW2018dem$nominate_dim1, na.rm=TRUE)
+houseDW2018rep<- houseDW %>% filter(congress == 2018 & party_code == "Republican")
+mean(houseDW2018rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2020dem<- houseDW %>% filter(congress == 2020 &  party_code == "Democrat")
+mean(houseDW2020dem$nominate_dim1, na.rm=TRUE)
+houseDW2020rep<- houseDW %>% filter(congress == 2020 & party_code == "Republican")
+mean(houseDW2020rep$nominate_dim1, na.rm=TRUE)
+
+houseDW2022dem<- houseDW %>% filter(congress == 2022 &  party_code == "Democrat")
+mean(houseDW2022dem$nominate_dim1, na.rm=TRUE)
+houseDW2022rep<- houseDW %>% filter(congress == 2022 & party_code == "Republican")
+mean(houseDW2022rep$nominate_dim1, na.rm=TRUE)
+```
+
+```{r NARAL manipulation}
+houseNARAL[c('rating', '%')] <- str_split_fixed(houseNARAL$rating, '%', 2)
+senateNARAL[c('rating', '%')] <- str_split_fixed(senateNARAL$rating, '%', 2)
+```
+
+```{r house NARAL analysis}
+houseNARAL$rating <- as.numeric(houseNARAL$rating)
+houseNARAL1997dem<- houseNARAL %>% filter(year == 1997 &  party == "Democratic")
+mean(houseNARAL1997dem$rating, na.rm=TRUE)
+houseNARAL1997rep<- houseNARAL %>% filter(year == 1997 & party == "Republican")
+mean(houseNARAL1997rep$rating, na.rm=TRUE)
+
+houseNARAL1999dem<- houseNARAL %>% filter(year == 1999 &  party == "Democratic")
+mean(houseNARAL1999dem$rating, na.rm=TRUE)
+houseNARAL1999rep<- houseNARAL %>% filter(year == 1999 & party == "Republican")
+mean(houseNARAL1999rep$rating, na.rm=TRUE)
+
+houseNARAL2000dem<- houseNARAL %>% filter(year == 2000 &  party == "Democratic")
+mean(houseNARAL2000dem$rating, na.rm=TRUE)
+houseNARAL2000rep<- houseNARAL %>% filter(year == 2000 & party == "Republican")
+mean(houseNARAL2000rep$rating, na.rm=TRUE)
+
+houseNARAL2001dem<- houseNARAL %>% filter(year == 2001 &  party == "Democratic")
+mean(houseNARAL2001dem$rating, na.rm=TRUE)
+houseNARAL2001rep<- houseNARAL %>% filter(year == 2001 & party == "Republican")
+mean(houseNARAL2001rep$rating, na.rm=TRUE)
+
+houseNARAL2003dem<- houseNARAL %>% filter(year == 2003 &  party == "Democratic")
+mean(houseNARAL2003dem$rating, na.rm=TRUE)
+houseNARAL2003rep<- houseNARAL %>% filter(year == 2003 & party == "Republican")
+mean(houseNARAL2003rep$rating, na.rm=TRUE)
+
+houseNARAL2004dem<- houseNARAL %>% filter(year == 2004 &  party == "Democratic")
+mean(houseNARAL2004dem$rating, na.rm=TRUE)
+houseNARAL2004rep<- houseNARAL %>% filter(year == 2004 & party == "Republican")
+mean(houseNARAL2004rep$rating, na.rm=TRUE)
+
+houseNARAL2005dem<- houseNARAL %>% filter(year == 2005 &  party == "Democratic")
+mean(houseNARAL2005dem$rating, na.rm=TRUE)
+houseNARAL2005rep<- houseNARAL %>% filter(year == 2005 & party == "Republican")
+mean(houseNARAL2005rep$rating, na.rm=TRUE)
+
+houseNARAL2006dem<- houseNARAL %>% filter(year == 2006 &  party == "Democratic")
+mean(houseNARAL2006dem$rating, na.rm=TRUE)
+houseNARAL2006rep<- houseNARAL %>% filter(year == 2006 & party == "Republican")
+mean(houseNARAL2006rep$rating, na.rm=TRUE)
+
+houseNARAL2007dem<- houseNARAL %>% filter(year == 2007 &  party == "Democratic")
+mean(houseNARAL2007dem$rating, na.rm=TRUE)
+houseNARAL2007rep<- houseNARAL %>% filter(year == 2007 & party == "Republican")
+mean(houseNARAL2007rep$rating, na.rm=TRUE)
+
+houseNARAL2009dem<- houseNARAL %>% filter(year == 2009 &  party == "Democratic")
+mean(houseNARAL2009dem$rating, na.rm=TRUE)
+houseNARAL2009rep<- houseNARAL %>% filter(year == 2009 & party == "Republican")
+mean(houseNARAL2009rep$rating, na.rm=TRUE)
+
+houseNARAL2010dem<- houseNARAL %>% filter(year == 2010 &  party == "Democratic")
+mean(houseNARAL2010dem$rating, na.rm=TRUE)
+houseNARAL2010rep<- houseNARAL %>% filter(year == 2010 & party == "Republican")
+mean(houseNARAL2010rep$rating, na.rm=TRUE)
+
+houseNARAL2011dem<- houseNARAL %>% filter(year == 2011 &  party == "Democratic")
+mean(houseNARAL2011dem$rating, na.rm=TRUE)
+houseNARAL2011rep<- houseNARAL %>% filter(year == 2011 & party == "Republican")
+mean(houseNARAL2011rep$rating, na.rm=TRUE)
+
+houseNARAL2012dem<- houseNARAL %>% filter(year == 2012 &  party == "Democratic")
+mean(houseNARAL2012dem$rating, na.rm=TRUE)
+houseNARAL2012rep<- houseNARAL %>% filter(year == 2012 & party == "Republican")
+mean(houseNARAL2012rep$rating, na.rm=TRUE)
+
+houseNARAL2013dem<- houseNARAL %>% filter(year == 2013 &  party == "Democratic")
+mean(houseNARAL2013dem$rating, na.rm=TRUE)
+houseNARAL2013rep<- houseNARAL %>% filter(year == 2013 & party == "Republican")
+mean(houseNARAL2013rep$rating, na.rm=TRUE)
+
+houseNARAL2014dem<- houseNARAL %>% filter(year == 2014 &  party == "Democratic")
+mean(houseNARAL2014dem$rating, na.rm=TRUE)
+houseNARAL2014rep<- houseNARAL %>% filter(year == 2014 & party == "Republican")
+mean(houseNARAL2014rep$rating, na.rm=TRUE)
+
+houseNARAL2015dem<- houseNARAL %>% filter(year == 2015 &  party == "Democratic")
+mean(houseNARAL2015dem$rating, na.rm=TRUE)
+houseNARAL2015rep<- houseNARAL %>% filter(year == 2015 & party == "Republican")
+mean(houseNARAL2015rep$rating, na.rm=TRUE)
+
+houseNARAL2016dem<- houseNARAL %>% filter(year == 2016 &  party == "Democratic")
+mean(houseNARAL2016dem$rating, na.rm=TRUE)
+houseNARAL2016rep<- houseNARAL %>% filter(year == 2016 & party == "Republican")
+mean(houseNARAL2016rep$rating, na.rm=TRUE)
+
+houseNARAL2017dem<- houseNARAL %>% filter(year == 2017 &  party == "Democratic")
+mean(houseNARAL2017dem$rating, na.rm=TRUE)
+houseNARAL2017rep<- houseNARAL %>% filter(year == 2017 & party == "Republican")
+mean(houseNARAL2017rep$rating, na.rm=TRUE)
+
+houseNARAL2019dem<- houseNARAL %>% filter(year == 2019 &  party == "Democratic")
+mean(houseNARAL2019dem$rating, na.rm=TRUE)
+houseNARAL2019rep<- houseNARAL %>% filter(year == 2019 & party == "Republican")
+mean(houseNARAL2019rep$rating, na.rm=TRUE)
+
+houseNARAL2020dem<- houseNARAL %>% filter(year == 2020 &  party == "Democratic")
+mean(houseNARAL2020dem$rating, na.rm=TRUE)
+houseNARAL2020rep<- houseNARAL %>% filter(year == 2020 & party == "Republican")
+mean(houseNARAL2020rep$rating, na.rm=TRUE)
+```
+
+```{r senate NARAL analysis}
+senateNARAL$rating <- as.numeric(senateNARAL$rating)
+senateNARAL1997dem<- senateNARAL %>% filter(year == 1997 &  party == "Democratic")
+mean(senateNARAL1997dem$rating, na.rm=TRUE)
+senateNARAL1997rep<- senateNARAL %>% filter(year == 1997 & party == "Republican")
+mean(senateNARAL1997rep$rating, na.rm=TRUE)
+
+senateNARAL1999dem<- senateNARAL %>% filter(year == 1999 &  party == "Democratic")
+mean(senateNARAL1999dem$rating, na.rm=TRUE)
+senateNARAL1999rep<- senateNARAL %>% filter(year == 1999 & party == "Republican")
+mean(senateNARAL1999rep$rating, na.rm=TRUE)
+
+senateNARAL2000dem<- senateNARAL %>% filter(year == 2000 &  party == "Democratic")
+mean(senateNARAL2000dem$rating, na.rm=TRUE)
+senateNARAL2000rep<- senateNARAL %>% filter(year == 2000 & party == "Republican")
+mean(senateNARAL2000rep$rating, na.rm=TRUE)
+
+senateNARAL2001dem<- senateNARAL %>% filter(year == 2001 &  party == "Democratic")
+mean(senateNARAL2001dem$rating, na.rm=TRUE)
+senateNARAL2001rep<- senateNARAL %>% filter(year == 2001 & party == "Republican")
+mean(senateNARAL2001rep$rating, na.rm=TRUE)
+
+senateNARAL2003dem<- senateNARAL %>% filter(year == 2003 &  party == "Democratic")
+mean(senateNARAL2003dem$rating, na.rm=TRUE)
+senateNARAL2003rep<- senateNARAL %>% filter(year == 2003 & party == "Republican")
+mean(senateNARAL2003rep$rating, na.rm=TRUE)
+
+senateNARAL2004dem<- senateNARAL %>% filter(year == 2004 &  party == "Democratic")
+mean(senateNARAL2004dem$rating, na.rm=TRUE)
+senateNARAL2004rep<- senateNARAL %>% filter(year == 2004 & party == "Republican")
+mean(senateNARAL2004rep$rating, na.rm=TRUE)
+
+senateNARAL2005dem<- senateNARAL %>% filter(year == 2005 &  party == "Democratic")
+mean(senateNARAL2005dem$rating, na.rm=TRUE)
+senateNARAL2005rep<- senateNARAL %>% filter(year == 2005 & party == "Republican")
+mean(senateNARAL2005rep$rating, na.rm=TRUE)
+
+senateNARAL2006dem<- senateNARAL %>% filter(year == 2006 &  party == "Democratic")
+mean(senateNARAL2006dem$rating, na.rm=TRUE)
+senateNARAL2006rep<- senateNARAL %>% filter(year == 2006 & party == "Republican")
+mean(senateNARAL2006rep$rating, na.rm=TRUE)
+
+senateNARAL2007dem<- senateNARAL %>% filter(year == 2007 &  party == "Democratic")
+mean(senateNARAL2007dem$rating, na.rm=TRUE)
+senateNARAL2007rep<- senateNARAL %>% filter(year == 2007 & party == "Republican")
+mean(senateNARAL2007rep$rating, na.rm=TRUE)
+
+senateNARAL2009dem<- senateNARAL %>% filter(year == 2009 &  party == "Democratic")
+mean(senateNARAL2009dem$rating, na.rm=TRUE)
+senateNARAL2009rep<- senateNARAL %>% filter(year == 2009 & party == "Republican")
+mean(senateNARAL2009rep$rating, na.rm=TRUE)
+
+senateNARAL2010dem<- senateNARAL %>% filter(year == 2010 &  party == "Democratic")
+mean(senateNARAL2010dem$rating, na.rm=TRUE)
+senateNARAL2010rep<- senateNARAL %>% filter(year == 2010 & party == "Republican")
+mean(senateNARAL2010rep$rating, na.rm=TRUE)
+
+senateNARAL2011dem<- senateNARAL %>% filter(year == 2011 &  party == "Democratic")
+mean(senateNARAL2011dem$rating, na.rm=TRUE)
+senateNARAL2011rep<- senateNARAL %>% filter(year == 2011 & party == "Republican")
+mean(senateNARAL2011rep$rating, na.rm=TRUE)
+
+senateNARAL2012dem<- senateNARAL %>% filter(year == 2012 &  party == "Democratic")
+mean(senateNARAL2012dem$rating, na.rm=TRUE)
+senateNARAL2012rep<- senateNARAL %>% filter(year == 2012 & party == "Republican")
+mean(senateNARAL2012rep$rating, na.rm=TRUE)
+
+senateNARAL2013dem<- senateNARAL %>% filter(year == 2013 &  party == "Democratic")
+mean(senateNARAL2013dem$rating, na.rm=TRUE)
+senateNARAL2013rep<- senateNARAL %>% filter(year == 2013 & party == "Republican")
+mean(senateNARAL2013rep$rating, na.rm=TRUE)
+
+senateNARAL2014dem<- senateNARAL %>% filter(year == 2014 &  party == "Democratic")
+mean(senateNARAL2014dem$rating, na.rm=TRUE)
+senateNARAL2014rep<- senateNARAL %>% filter(year == 2014 & party == "Republican")
+mean(senateNARAL2014rep$rating, na.rm=TRUE)
+
+senateNARAL2015dem<- senateNARAL %>% filter(year == 2015 &  party == "Democratic")
+mean(senateNARAL2015dem$rating, na.rm=TRUE)
+senateNARAL2015rep<- senateNARAL %>% filter(year == 2015 & party == "Republican")
+mean(senateNARAL2015rep$rating, na.rm=TRUE)
+
+senateNARAL2016dem<- senateNARAL %>% filter(year == 2016 &  party == "Democratic")
+mean(senateNARAL2016dem$rating, na.rm=TRUE)
+senateNARAL2016rep<- senateNARAL %>% filter(year == 2016 & party == "Republican")
+mean(senateNARAL2016rep$rating, na.rm=TRUE)
+
+senateNARAL2017dem<- senateNARAL %>% filter(year == 2017 &  party == "Democratic")
+mean(senateNARAL2017dem$rating, na.rm=TRUE)
+senateNARAL2017rep<- senateNARAL %>% filter(year == 2017 & party == "Republican")
+mean(senateNARAL2017rep$rating, na.rm=TRUE)
+
+senateNARAL2019dem<- senateNARAL %>% filter(year == 2019 &  party == "Democratic")
+mean(senateNARAL2019dem$rating, na.rm=TRUE)
+senateNARAL2019rep<- senateNARAL %>% filter(year == 2019 & party == "Republican")
+mean(senateNARAL2019rep$rating, na.rm=TRUE)
+
+senateNARAL2020dem<- senateNARAL %>% filter(year == 2020 &  party == "Democratic")
+mean(senateNARAL2020dem$rating, na.rm=TRUE)
+senateNARAL2020rep<- senateNARAL %>% filter(year == 2020 & party == "Republican")
+mean(senateNARAL2020rep$rating, na.rm=TRUE)
+```
+
+```{r CAGW manipulation}
+houseCAGW[c('rating', '%')] <- str_split_fixed(houseCAGW$rating, '%', 2)
+senateCAGW[c('rating', '%')] <- str_split_fixed(senateCAGW$rating, '%', 2)
+```
+
+```{r house CAGW analysis}
+houseCAGW$rating <- as.numeric(houseCAGW$rating)
+houseCAGW1997dem<- houseCAGW %>% filter(year == 1997 &  party == "Democratic")
+mean(houseCAGW1997dem$rating, na.rm=TRUE)
+houseCAGW1997rep<- houseCAGW %>% filter(year == 1997 & party == "Republican")
+mean(houseCAGW1997rep$rating, na.rm=TRUE)
+
+houseCAGW1998dem<- houseCAGW %>% filter(year == 1998 &  party == "Democratic")
+mean(houseCAGW1998dem$rating, na.rm=TRUE)
+houseCAGW1998rep<- houseCAGW %>% filter(year == 1998 & party == "Republican")
+mean(houseCAGW1998rep$rating, na.rm=TRUE)
+
+houseCAGW1999dem<- houseCAGW %>% filter(year == 1999 &  party == "Democratic")
+mean(houseCAGW1999dem$rating, na.rm=TRUE)
+houseCAGW1999rep<- houseCAGW %>% filter(year == 1999 & party == "Republican")
+mean(houseCAGW1999rep$rating, na.rm=TRUE)
+
+houseCAGW2000dem<- houseCAGW %>% filter(year == 2000 &  party == "Democratic")
+mean(houseCAGW2000dem$rating, na.rm=TRUE)
+houseCAGW2000rep<- houseCAGW %>% filter(year == 2000 & party == "Republican")
+mean(houseCAGW2000rep$rating, na.rm=TRUE)
+
+houseCAGW2001dem<- houseCAGW %>% filter(year == 2001 &  party == "Democratic")
+mean(houseCAGW2001dem$rating, na.rm=TRUE)
+houseCAGW2001rep<- houseCAGW %>% filter(year == 2001 & party == "Republican")
+mean(houseCAGW2001rep$rating, na.rm=TRUE)
+
+houseCAGW2002dem<- houseCAGW %>% filter(year == 2002 &  party == "Democratic")
+mean(houseCAGW2002dem$rating, na.rm=TRUE)
+houseCAGW2002rep<- houseCAGW %>% filter(year == 2002 & party == "Republican")
+mean(houseCAGW2002rep$rating, na.rm=TRUE)
+
+houseCAGW2003dem<- houseCAGW %>% filter(year == 2003 &  party == "Democratic")
+mean(houseCAGW2003dem$rating, na.rm=TRUE)
+houseCAGW2003rep<- houseCAGW %>% filter(year == 2003 & party == "Republican")
+mean(houseCAGW2003rep$rating, na.rm=TRUE)
+
+houseCAGW2004dem<- houseCAGW %>% filter(year == 2004 &  party == "Democratic")
+mean(houseCAGW2004dem$rating, na.rm=TRUE)
+houseCAGW2004rep<- houseCAGW %>% filter(year == 2004 & party == "Republican")
+mean(houseCAGW2004rep$rating, na.rm=TRUE)
+
+houseCAGW20052006dem<- houseCAGW %>% filter(year == 20052006 &  party == "Democratic")
+mean(houseCAGW20052006dem$rating, na.rm=TRUE)
+houseCAGW20052006rep<- houseCAGW %>% filter(year == 20052006 & party == "Republican")
+mean(houseCAGW20052006rep$rating, na.rm=TRUE)
+
+houseCAGW2007dem<- houseCAGW %>% filter(year == 2007 &  party == "Democratic")
+mean(houseCAGW2007dem$rating, na.rm=TRUE)
+houseCAGW2007rep<- houseCAGW %>% filter(year == 2007 & party == "Republican")
+mean(houseCAGW2007rep$rating, na.rm=TRUE)
+
+houseCAGW2008dem<- houseCAGW %>% filter(year == 2008 &  party == "Democratic")
+mean(houseCAGW2008dem$rating, na.rm=TRUE)
+houseCAGW2008rep<- houseCAGW %>% filter(year == 2008 & party == "Republican")
+mean(houseCAGW2008rep$rating, na.rm=TRUE)
+
+houseCAGW2009dem<- houseCAGW %>% filter(year == 2009 &  party == "Democratic")
+mean(houseCAGW2009dem$rating, na.rm=TRUE)
+houseCAGW2009rep<- houseCAGW %>% filter(year == 2009 & party == "Republican")
+mean(houseCAGW2009rep$rating, na.rm=TRUE)
+
+houseCAGW2010dem<- houseCAGW %>% filter(year == 2010 &  party == "Democratic")
+mean(houseCAGW2010dem$rating, na.rm=TRUE)
+houseCAGW2010rep<- houseCAGW %>% filter(year == 2010 & party == "Republican")
+mean(houseCAGW2010rep$rating, na.rm=TRUE)
+
+houseCAGW2011dem<- houseCAGW %>% filter(year == 2011 &  party == "Democratic")
+mean(houseCAGW2011dem$rating, na.rm=TRUE)
+houseCAGW2011rep<- houseCAGW %>% filter(year == 2011 & party == "Republican")
+mean(houseCAGW2011rep$rating, na.rm=TRUE)
+
+houseCAGW2013dem<- houseCAGW %>% filter(year == 2013 &  party == "Democratic")
+mean(houseCAGW2013dem$rating, na.rm=TRUE)
+houseCAGW2013rep<- houseCAGW %>% filter(year == 2013 & party == "Republican")
+mean(houseCAGW2013rep$rating, na.rm=TRUE)
+
+houseCAGW2014dem<- houseCAGW %>% filter(year == 2014 &  party == "Democratic")
+mean(houseCAGW2014dem$rating, na.rm=TRUE)
+houseCAGW2014rep<- houseCAGW %>% filter(year == 2014 & party == "Republican")
+mean(houseCAGW2014rep$rating, na.rm=TRUE)
+
+houseCAGW2015dem<- houseCAGW %>% filter(year == 2015 &  party == "Democratic")
+mean(houseCAGW2015dem$rating, na.rm=TRUE)
+houseCAGW2015rep<- houseCAGW %>% filter(year == 2015 & party == "Republican")
+mean(houseCAGW2015rep$rating, na.rm=TRUE)
+
+houseCAGW2016dem<- houseCAGW %>% filter(year == 2016 &  party == "Democratic")
+mean(houseCAGW2016dem$rating, na.rm=TRUE)
+houseCAGW2016rep<- houseCAGW %>% filter(year == 2016 & party == "Republican")
+mean(houseCAGW2016rep$rating, na.rm=TRUE)
+
+houseCAGW2017dem<- houseCAGW %>% filter(year == 2017 &  party == "Democratic")
+mean(houseCAGW2017dem$rating, na.rm=TRUE)
+houseCAGW2017rep<- houseCAGW %>% filter(year == 2017 & party == "Republican")
+mean(houseCAGW2017rep$rating, na.rm=TRUE)
+
+houseCAGW2018dem<- houseCAGW %>% filter(year == 2018 &  party == "Democratic")
+mean(houseCAGW2018dem$rating, na.rm=TRUE)
+houseCAGW2018rep<- houseCAGW %>% filter(year == 2018 & party == "Republican")
+mean(houseCAGW2018rep$rating, na.rm=TRUE)
+
+houseCAGW2019dem<- houseCAGW %>% filter(year == 2019 &  party == "Democratic")
+mean(houseCAGW2019dem$rating, na.rm=TRUE)
+houseCAGW2019rep<- houseCAGW %>% filter(year == 2019 & party == "Republican")
+mean(houseCAGW2019rep$rating, na.rm=TRUE)
+
+houseCAGW2020dem<- houseCAGW %>% filter(year == 2020 &  party == "Democratic")
+mean(houseCAGW2020dem$rating, na.rm=TRUE)
+houseCAGW2020rep<- houseCAGW %>% filter(year == 2020 & party == "Republican")
+mean(houseCAGW2020rep$rating, na.rm=TRUE)
+```
+
+```{r senate CAGW analysis}
+senateCAGW$rating <- as.numeric(senateCAGW$rating)
+senateCAGW1997dem<- senateCAGW %>% filter(year == 1997 &  party == "Democratic")
+mean(senateCAGW1997dem$rating, na.rm=TRUE)
+senateCAGW1997rep<- senateCAGW %>% filter(year == 1997 & party == "Republican")
+mean(senateCAGW1997rep$rating, na.rm=TRUE)
+
+senateCAGW1998dem<- senateCAGW %>% filter(year == 1998 &  party == "Democratic")
+mean(senateCAGW1998dem$rating, na.rm=TRUE)
+senateCAGW1998rep<- senateCAGW %>% filter(year == 1998 & party == "Republican")
+mean(senateCAGW1998rep$rating, na.rm=TRUE)
+
+senateCAGW1999dem<- senateCAGW %>% filter(year == 1999 &  party == "Democratic")
+mean(senateCAGW1999dem$rating, na.rm=TRUE)
+senateCAGW1999rep<- senateCAGW %>% filter(year == 1999 & party == "Republican")
+mean(senateCAGW1999rep$rating, na.rm=TRUE)
+
+senateCAGW2000dem<- senateCAGW %>% filter(year == 2000 &  party == "Democratic")
+mean(senateCAGW2000dem$rating, na.rm=TRUE)
+senateCAGW2000rep<- senateCAGW %>% filter(year == 2000 & party == "Republican")
+mean(senateCAGW2000rep$rating, na.rm=TRUE)
+
+senateCAGW2001dem<- senateCAGW %>% filter(year == 2001 &  party == "Democratic")
+mean(senateCAGW2001dem$rating, na.rm=TRUE)
+senateCAGW2001rep<- senateCAGW %>% filter(year == 2001 & party == "Republican")
+mean(senateCAGW2001rep$rating, na.rm=TRUE)
+
+senateCAGW2002dem<- senateCAGW %>% filter(year == 2002 &  party == "Democratic")
+mean(senateCAGW2002dem$rating, na.rm=TRUE)
+senateCAGW2002rep<- senateCAGW %>% filter(year == 2002 & party == "Republican")
+mean(senateCAGW2002rep$rating, na.rm=TRUE)
+
+senateCAGW2003dem<- senateCAGW %>% filter(year == 2003 &  party == "Democratic")
+mean(senateCAGW2003dem$rating, na.rm=TRUE)
+senateCAGW2003rep<- senateCAGW %>% filter(year == 2003 & party == "Republican")
+mean(senateCAGW2003rep$rating, na.rm=TRUE)
+
+senateCAGW2004dem<- senateCAGW %>% filter(year == 2004 &  party == "Democratic")
+mean(senateCAGW2004dem$rating, na.rm=TRUE)
+senateCAGW2004rep<- senateCAGW %>% filter(year == 2004 & party == "Republican")
+mean(senateCAGW2004rep$rating, na.rm=TRUE)
+
+senateCAGW20052006dem<- senateCAGW %>% filter(year == 20052006 &  party == "Democratic")
+mean(senateCAGW20052006dem$rating, na.rm=TRUE)
+senateCAGW20052006rep<- senateCAGW %>% filter(year == 20052006 & party == "Republican")
+mean(senateCAGW20052006rep$rating, na.rm=TRUE)
+
+senateCAGW2007dem<- senateCAGW %>% filter(year == 2007 &  party == "Democratic")
+mean(senateCAGW2007dem$rating, na.rm=TRUE)
+senateCAGW2007rep<- senateCAGW %>% filter(year == 2007 & party == "Republican")
+mean(senateCAGW2007rep$rating, na.rm=TRUE)
+
+senateCAGW2008dem<- senateCAGW %>% filter(year == 2008 &  party == "Democratic")
+mean(senateCAGW2008dem$rating, na.rm=TRUE)
+senateCAGW2008rep<- senateCAGW %>% filter(year == 2008 & party == "Republican")
+mean(senateCAGW2008rep$rating, na.rm=TRUE)
+
+senateCAGW2009dem<- senateCAGW %>% filter(year == 2009 &  party == "Democratic")
+mean(senateCAGW2009dem$rating, na.rm=TRUE)
+senateCAGW2009rep<- senateCAGW %>% filter(year == 2009 & party == "Republican")
+mean(senateCAGW2009rep$rating, na.rm=TRUE)
+
+senateCAGW2010dem<- senateCAGW %>% filter(year == 2010 &  party == "Democratic")
+mean(senateCAGW2010dem$rating, na.rm=TRUE)
+senateCAGW2010rep<- senateCAGW %>% filter(year == 2010 & party == "Republican")
+mean(senateCAGW2010rep$rating, na.rm=TRUE)
+
+senateCAGW2011dem<- senateCAGW %>% filter(year == 2011 &  party == "Democratic")
+mean(senateCAGW2011dem$rating, na.rm=TRUE)
+senateCAGW2011rep<- senateCAGW %>% filter(year == 2011 & party == "Republican")
+mean(senateCAGW2011rep$rating, na.rm=TRUE)
+
+senateCAGW2013dem<- senateCAGW %>% filter(year == 2013 &  party == "Democratic")
+mean(senateCAGW2013dem$rating, na.rm=TRUE)
+senateCAGW2013rep<- senateCAGW %>% filter(year == 2013 & party == "Republican")
+mean(senateCAGW2013rep$rating, na.rm=TRUE)
+
+senateCAGW2014dem<- senateCAGW %>% filter(year == 2014 &  party == "Democratic")
+mean(senateCAGW2014dem$rating, na.rm=TRUE)
+senateCAGW2014rep<- senateCAGW %>% filter(year == 2014 & party == "Republican")
+mean(senateCAGW2014rep$rating, na.rm=TRUE)
+
+senateCAGW2015dem<- senateCAGW %>% filter(year == 2015 &  party == "Democratic")
+mean(senateCAGW2015dem$rating, na.rm=TRUE)
+senateCAGW2015rep<- senateCAGW %>% filter(year == 2015 & party == "Republican")
+mean(senateCAGW2015rep$rating, na.rm=TRUE)
+
+senateCAGW2016dem<- senateCAGW %>% filter(year == 2016 &  party == "Democratic")
+mean(senateCAGW2016dem$rating, na.rm=TRUE)
+senateCAGW2016rep<- senateCAGW %>% filter(year == 2016 & party == "Republican")
+mean(senateCAGW2016rep$rating, na.rm=TRUE)
+
+senateCAGW2017dem<- senateCAGW %>% filter(year == 2017 &  party == "Democratic")
+mean(senateCAGW2017dem$rating, na.rm=TRUE)
+senateCAGW2017rep<- senateCAGW %>% filter(year == 2017 & party == "Republican")
+mean(senateCAGW2017rep$rating, na.rm=TRUE)
+
+senateCAGW2018dem<- senateCAGW %>% filter(year == 2018 &  party == "Democratic")
+mean(senateCAGW2018dem$rating, na.rm=TRUE)
+senateCAGW2018rep<- senateCAGW %>% filter(year == 2018 & party == "Republican")
+mean(senateCAGW2018rep$rating, na.rm=TRUE)
+
+senateCAGW2019dem<- senateCAGW %>% filter(year == 2019 &  party == "Democratic")
+mean(senateCAGW2019dem$rating, na.rm=TRUE)
+senateCAGW2019rep<- senateCAGW %>% filter(year == 2019 & party == "Republican")
+mean(senateCAGW2019rep$rating, na.rm=TRUE)
+
+senateCAGW2020dem<- senateCAGW %>% filter(year == 2020 &  party == "Democratic")
+mean(senateCAGW2020dem$rating, na.rm=TRUE)
+senateCAGW2020rep<- senateCAGW %>% filter(year == 2020 & party == "Republican")
+mean(senateCAGW2020rep$rating, na.rm=TRUE)
+```
+
+```{r HRC manipulation}
+houseHRC[c('rating', '%')] <- str_split_fixed(houseHRC$rating, '%', 2)
+senateHRC[c('rating', '%')] <- str_split_fixed(senateHRC$rating, '%', 2)
+```
+
+```{r house HRC analysis}
+houseHRC$rating <- as.numeric(houseHRC$rating)
+houseHRC19971998dem<- houseHRC %>% filter(year == 19971998 &  party == "Democratic")
+mean(houseHRC19971998dem$rating, na.rm=TRUE)
+houseHRC19971998rep<- houseHRC %>% filter(year == 19971998 & party == "Republican")
+mean(houseHRC19971998rep$rating, na.rm=TRUE)
+
+houseHRC19992000dem<- houseHRC %>% filter(year == 19992000 &  party == "Democratic")
+mean(houseHRC19992000dem$rating, na.rm=TRUE)
+houseHRC19992000rep<- houseHRC %>% filter(year == 19992000 & party == "Republican")
+mean(houseHRC19992000rep$rating, na.rm=TRUE)
+
+houseHRC20012002dem<- houseHRC %>% filter(year == 20012002 &  party == "Democratic")
+mean(houseHRC20012002dem$rating, na.rm=TRUE)
+houseHRC20012002rep<- houseHRC %>% filter(year == 20012002 & party == "Republican")
+mean(houseHRC20012002rep$rating, na.rm=TRUE)
+
+houseHRC20032004dem<- houseHRC %>% filter(year == 20032004 &  party == "Democratic")
+mean(houseHRC20032004dem$rating, na.rm=TRUE)
+houseHRC20032004rep<- houseHRC %>% filter(year == 20032004 & party == "Republican")
+mean(houseHRC20032004rep$rating, na.rm=TRUE)
+
+houseHRC20052006dem<- houseHRC %>% filter(year == 20052006 &  party == "Democratic")
+mean(houseHRC20052006dem$rating, na.rm=TRUE)
+houseHRC20052006rep<- houseHRC %>% filter(year == 20052006 & party == "Republican")
+mean(houseHRC20052006rep$rating, na.rm=TRUE)
+
+houseHRC20072008dem<- houseHRC %>% filter(year == 20072008 &  party == "Democratic")
+mean(houseHRC20072008dem$rating, na.rm=TRUE)
+houseHRC20072008rep<- houseHRC %>% filter(year == 20072008 & party == "Republican")
+mean(houseHRC20072008rep$rating, na.rm=TRUE)
+
+houseHRC20092010dem<- houseHRC %>% filter(year == 20092010 &  party == "Democratic")
+mean(houseHRC20092010dem$rating, na.rm=TRUE)
+houseHRC20092010rep<- houseHRC %>% filter(year == 20092010 & party == "Republican")
+mean(houseHRC20092010rep$rating, na.rm=TRUE)
+
+houseHRC20112012dem<- houseHRC %>% filter(year == 20112012 &  party == "Democratic")
+mean(houseHRC20112012dem$rating, na.rm=TRUE)
+houseHRC20112012rep<- houseHRC %>% filter(year == 20112012 & party == "Republican")
+mean(houseHRC20112012rep$rating, na.rm=TRUE)
+
+houseHRC20132014dem<- houseHRC %>% filter(year == 20132014 &  party == "Democratic")
+mean(houseHRC20132014dem$rating, na.rm=TRUE)
+houseHRC20132014rep<- houseHRC %>% filter(year == 20132014 & party == "Republican")
+mean(houseHRC20132014rep$rating, na.rm=TRUE)
+
+houseHRC20152016dem<- houseHRC %>% filter(year == 20152016 &  party == "Democratic")
+mean(houseHRC20152016dem$rating, na.rm=TRUE)
+houseHRC20152016rep<- houseHRC %>% filter(year == 20152016 & party == "Republican")
+mean(houseHRC20152016rep$rating, na.rm=TRUE)
+
+houseHRC20172018dem<- houseHRC %>% filter(year == 20172018 &  party == "Democratic")
+mean(houseHRC20172018dem$rating, na.rm=TRUE)
+houseHRC20172018rep<- houseHRC %>% filter(year == 20172018 & party == "Republican")
+mean(houseHRC20172018rep$rating, na.rm=TRUE)
+
+houseHRC20192020dem<- houseHRC %>% filter(year == 20192020 &  party == "Democratic")
+mean(houseHRC20192020dem$rating, na.rm=TRUE)
+houseHRC20192020rep<- houseHRC %>% filter(year == 20192020 & party == "Republican")
+mean(houseHRC20192020rep$rating, na.rm=TRUE)
+```
+
+
+```{r senate HRC analysis}
+senateHRC$rating <- as.numeric(senateHRC$rating)
+senateHRC19971998dem<- senateHRC %>% filter(year == 19971998 &  party == "Democratic")
+mean(senateHRC19971998dem$rating, na.rm=TRUE)
+senateHRC19971998rep<- senateHRC %>% filter(year == 19971998 & party == "Republican")
+mean(senateHRC19971998rep$rating, na.rm=TRUE)
+
+senateHRC19992000dem<- senateHRC %>% filter(year == 19992000 &  party == "Democratic")
+mean(senateHRC19992000dem$rating, na.rm=TRUE)
+senateHRC19992000rep<- senateHRC %>% filter(year == 19992000 & party == "Republican")
+mean(senateHRC19992000rep$rating, na.rm=TRUE)
+
+senateHRC20012002dem<- senateHRC %>% filter(year == 20012002 &  party == "Democratic")
+mean(senateHRC20012002dem$rating, na.rm=TRUE)
+senateHRC20012002rep<- senateHRC %>% filter(year == 20012002 & party == "Republican")
+mean(senateHRC20012002rep$rating, na.rm=TRUE)
+
+senateHRC20032004dem<- senateHRC %>% filter(year == 20032004 &  party == "Democratic")
+mean(senateHRC20032004dem$rating, na.rm=TRUE)
+senateHRC20032004rep<- senateHRC %>% filter(year == 20032004 & party == "Republican")
+mean(senateHRC20032004rep$rating, na.rm=TRUE)
+
+senateHRC20052006dem<- senateHRC %>% filter(year == 20052006 &  party == "Democratic")
+mean(senateHRC20052006dem$rating, na.rm=TRUE)
+senateHRC20052006rep<- senateHRC %>% filter(year == 20052006 & party == "Republican")
+mean(senateHRC20052006rep$rating, na.rm=TRUE)
+
+senateHRC20072008dem<- senateHRC %>% filter(year == 20072008 &  party == "Democratic")
+mean(senateHRC20072008dem$rating, na.rm=TRUE)
+senateHRC20072008rep<- senateHRC %>% filter(year == 20072008 & party == "Republican")
+mean(senateHRC20072008rep$rating, na.rm=TRUE)
+
+senateHRC20092010dem<- senateHRC %>% filter(year == 20092010 &  party == "Democratic")
+mean(senateHRC20092010dem$rating, na.rm=TRUE)
+senateHRC20092010rep<- senateHRC %>% filter(year == 20092010 & party == "Republican")
+mean(senateHRC20092010rep$rating, na.rm=TRUE)
+
+senateHRC20112012dem<- senateHRC %>% filter(year == 20112012 &  party == "Democratic")
+mean(senateHRC20112012dem$rating, na.rm=TRUE)
+senateHRC20112012rep<- senateHRC %>% filter(year == 20112012 & party == "Republican")
+mean(senateHRC20112012rep$rating, na.rm=TRUE)
+
+senateHRC20132014dem<- senateHRC %>% filter(year == 20132014 &  party == "Democratic")
+mean(senateHRC20132014dem$rating, na.rm=TRUE)
+senateHRC20132014rep<- senateHRC %>% filter(year == 20132014 & party == "Republican")
+mean(senateHRC20132014rep$rating, na.rm=TRUE)
+
+senateHRC20152016dem<- senateHRC %>% filter(year == 20152016 &  party == "Democratic")
+mean(senateHRC20152016dem$rating, na.rm=TRUE)
+senateHRC20152016rep<- senateHRC %>% filter(year == 20152016 & party == "Republican")
+mean(senateHRC20152016rep$rating, na.rm=TRUE)
+
+senateHRC20172018dem<- senateHRC %>% filter(year == 20172018 &  party == "Democratic")
+mean(senateHRC20172018dem$rating, na.rm=TRUE)
+senateHRC20172018rep<- senateHRC %>% filter(year == 20172018 & party == "Republican")
+mean(senateHRC20172018rep$rating, na.rm=TRUE)
+
+senateHRC20192020dem<- senateHRC %>% filter(year == 20192020 &  party == "Democratic")
+mean(senateHRC20192020dem$rating, na.rm=TRUE)
+senateHRC20192020rep<- senateHRC %>% filter(year == 20192020 & party == "Republican")
+mean(senateHRC20192020rep$rating, na.rm=TRUE)
+```
+
+```{r ACLU manipulation}
+houseACLU[c('rating', '%')] <- str_split_fixed(houseACLU$rating, '%', 2)
+senateACLU[c('rating', '%')] <- str_split_fixed(senateACLU$rating, '%', 2)
+```
+
+```{r house ACLU analysis}
+houseACLU$rating <- as.numeric(houseACLU$rating)
+houseACLU19971998dem<- houseACLU %>% filter(year == 19971998 &  party == "Democratic")
+mean(houseACLU19971998dem$rating, na.rm=TRUE)
+houseACLU19971998rep<- houseACLU %>% filter(year == 19971998 & party == "Republican")
+mean(houseACLU19971998rep$rating, na.rm=TRUE)
+
+houseACLU1999dem<- houseACLU %>% filter(year == 1999 &  party == "Democratic")
+mean(houseACLU1999dem$rating, na.rm=TRUE)
+houseACLU1999rep<- houseACLU %>% filter(year == 1999 & party == "Republican")
+mean(houseACLU1999rep$rating, na.rm=TRUE)
+
+houseACLU2000dem<- houseACLU %>% filter(year == 2000 &  party == "Democratic")
+mean(houseACLU2000dem$rating, na.rm=TRUE)
+houseACLU2000rep<- houseACLU %>% filter(year == 2000 & party == "Republican")
+mean(houseACLU2000rep$rating, na.rm=TRUE)
+
+houseACLU20012002dem<- houseACLU %>% filter(year == 20012002 &  party == "Democratic")
+mean(houseACLU20012002dem$rating, na.rm=TRUE)
+houseACLU20012002rep<- houseACLU %>% filter(year == 20012002 & party == "Republican")
+mean(houseACLU20012002rep$rating, na.rm=TRUE)
+
+houseACLU20032004dem<- houseACLU %>% filter(year == 20032004 &  party == "Democratic")
+mean(houseACLU20032004dem$rating, na.rm=TRUE)
+houseACLU20032004rep<- houseACLU %>% filter(year == 20032004 & party == "Republican")
+mean(houseACLU20032004rep$rating, na.rm=TRUE)
+
+houseACLU20052006dem<- houseACLU %>% filter(year == 20052006 &  party == "Democratic")
+mean(houseACLU20052006dem$rating, na.rm=TRUE)
+houseACLU20052006rep<- houseACLU %>% filter(year == 20052006 & party == "Republican")
+mean(houseACLU20052006rep$rating, na.rm=TRUE)
+
+houseACLU20072008dem<- houseACLU %>% filter(year == 20072008 &  party == "Democratic")
+mean(houseACLU20072008dem$rating, na.rm=TRUE)
+houseACLU20072008rep<- houseACLU %>% filter(year == 20072008 & party == "Republican")
+mean(houseACLU20072008rep$rating, na.rm=TRUE)
+
+houseACLU20092010dem<- houseACLU %>% filter(year == 20092010 &  party == "Democratic")
+mean(houseACLU20092010dem$rating, na.rm=TRUE)
+houseACLU20092010rep<- houseACLU %>% filter(year == 20092010 & party == "Republican")
+mean(houseACLU20092010rep$rating, na.rm=TRUE)
+
+houseACLU20112012dem<- houseACLU %>% filter(year == 20112012 &  party == "Democratic")
+mean(houseACLU20112012dem$rating, na.rm=TRUE)
+houseACLU20112012rep<- houseACLU %>% filter(year == 20112012 & party == "Republican")
+mean(houseACLU20112012rep$rating, na.rm=TRUE)
+
+houseACLU20132014dem<- houseACLU %>% filter(year == 20132014 &  party == "Democratic")
+mean(houseACLU20132014dem$rating, na.rm=TRUE)
+houseACLU20132014rep<- houseACLU %>% filter(year == 20132014 & party == "Republican")
+mean(houseACLU20132014rep$rating, na.rm=TRUE)
+
+houseACLU20152016dem<- houseACLU %>% filter(year == 20152016 &  party == "Democratic")
+mean(houseACLU20152016dem$rating, na.rm=TRUE)
+houseACLU20152016rep<- houseACLU %>% filter(year == 20152016 & party == "Republican")
+mean(houseACLU20152016rep$rating, na.rm=TRUE)
+
+houseACLU20172018dem<- houseACLU %>% filter(year == 20172018 &  party == "Democratic")
+mean(houseACLU20172018dem$rating, na.rm=TRUE)
+houseACLU20172018rep<- houseACLU %>% filter(year == 20172018 & party == "Republican")
+mean(houseACLU20172018rep$rating, na.rm=TRUE)
+
+houseACLU20192020dem<- houseACLU %>% filter(year == 20192020 &  party == "Democratic")
+mean(houseACLU20192020dem$rating, na.rm=TRUE)
+houseACLU20192020rep<- houseACLU %>% filter(year == 20192020 & party == "Republican")
+mean(houseACLU20192020rep$rating, na.rm=TRUE)
+```
+
+```{r senate ACLU analysis}
+senateACLU$rating <- as.numeric(senateACLU$rating)
+senateACLU19971998dem<- senateACLU %>% filter(year == 19971998 &  party == "Democratic")
+mean(senateACLU19971998dem$rating, na.rm=TRUE)
+senateACLU19971998rep<- senateACLU %>% filter(year == 19971998 & party == "Republican")
+mean(senateACLU19971998rep$rating, na.rm=TRUE)
+
+senateACLU1999dem<- senateACLU %>% filter(year == 1999 &  party == "Democratic")
+mean(senateACLU1999dem$rating, na.rm=TRUE)
+senateACLU1999rep<- senateACLU %>% filter(year == 1999 & party == "Republican")
+mean(senateACLU1999rep$rating, na.rm=TRUE)
+
+senateACLU2000dem<- senateACLU %>% filter(year == 2000 &  party == "Democratic")
+mean(senateACLU2000dem$rating, na.rm=TRUE)
+senateACLU2000rep<- senateACLU %>% filter(year == 2000 & party == "Republican")
+mean(senateACLU2000rep$rating, na.rm=TRUE)
+
+senateACLU20012002dem<- senateACLU %>% filter(year == 20012002 &  party == "Democratic")
+mean(senateACLU20012002dem$rating, na.rm=TRUE)
+senateACLU20012002rep<- senateACLU %>% filter(year == 20012002 & party == "Republican")
+mean(senateACLU20012002rep$rating, na.rm=TRUE)
+
+senateACLU20032004dem<- senateACLU %>% filter(year == 20032004 &  party == "Democratic")
+mean(senateACLU20032004dem$rating, na.rm=TRUE)
+senateACLU20032004rep<- senateACLU %>% filter(year == 20032004 & party == "Republican")
+mean(senateACLU20032004rep$rating, na.rm=TRUE)
+
+senateACLU20052006dem<- senateACLU %>% filter(year == 20052006 &  party == "Democratic")
+mean(senateACLU20052006dem$rating, na.rm=TRUE)
+senateACLU20052006rep<- senateACLU %>% filter(year == 20052006 & party == "Republican")
+mean(senateACLU20052006rep$rating, na.rm=TRUE)
+
+senateACLU20072008dem<- senateACLU %>% filter(year == 20072008 &  party == "Democratic")
+mean(senateACLU20072008dem$rating, na.rm=TRUE)
+senateACLU20072008rep<- senateACLU %>% filter(year == 20072008 & party == "Republican")
+mean(senateACLU20072008rep$rating, na.rm=TRUE)
+
+senateACLU20092010dem<- senateACLU %>% filter(year == 20092010 &  party == "Democratic")
+mean(senateACLU20092010dem$rating, na.rm=TRUE)
+senateACLU20092010rep<- senateACLU %>% filter(year == 20092010 & party == "Republican")
+mean(senateACLU20092010rep$rating, na.rm=TRUE)
+
+senateACLU20112012dem<- senateACLU %>% filter(year == 20112012 &  party == "Democratic")
+mean(senateACLU20112012dem$rating, na.rm=TRUE)
+senateACLU20112012rep<- senateACLU %>% filter(year == 20112012 & party == "Republican")
+mean(senateACLU20112012rep$rating, na.rm=TRUE)
+
+senateACLU20132014dem<- senateACLU %>% filter(year == 20132014 &  party == "Democratic")
+mean(senateACLU20132014dem$rating, na.rm=TRUE)
+senateACLU20132014rep<- senateACLU %>% filter(year == 20132014 & party == "Republican")
+mean(senateACLU20132014rep$rating, na.rm=TRUE)
+
+senateACLU20152016dem<- senateACLU %>% filter(year == 20152016 &  party == "Democratic")
+mean(senateACLU20152016dem$rating, na.rm=TRUE)
+senateACLU20152016rep<- senateACLU %>% filter(year == 20152016 & party == "Republican")
+mean(senateACLU20152016rep$rating, na.rm=TRUE)
+
+senateACLU20172018dem<- senateACLU %>% filter(year == 20172018 &  party == "Democratic")
+mean(senateACLU20172018dem$rating, na.rm=TRUE)
+senateACLU20172018rep<- senateACLU %>% filter(year == 20172018 & party == "Republican")
+mean(senateACLU20172018rep$rating, na.rm=TRUE)
+
+senateACLU20192020dem<- senateACLU %>% filter(year == 20192020 &  party == "Democratic")
+mean(senateACLU20192020dem$rating, na.rm=TRUE)
+senateACLU20192020rep<- senateACLU %>% filter(year == 20192020 & party == "Republican")
+mean(senateACLU20192020rep$rating, na.rm=TRUE)
+```
+
+```{r RTL manipulation}
+senateRTL[c('rating', '%')] <- str_split_fixed(senateRTL$rating, '%', 2)
+houseRTL[c('rating', '%')] <- str_split_fixed(houseRTL$rating, '%', 2)
+```
+
+```{r house RTL analysis}
+houseRTL$rating <- as.numeric(houseRTL$rating)
+houseRTL19971998dem<- houseRTL %>% filter(year == 19971998 &  party == "Democratic")
+mean(houseRTL19971998dem$rating, na.rm=TRUE)
+houseRTL19971998rep<- houseRTL %>% filter(year == 19971998 & party == "Republican")
+mean(houseRTL19971998rep$rating, na.rm=TRUE)
+
+houseRTL19992000dem<- houseRTL %>% filter(year == 19992000 &  party == "Democratic")
+mean(houseRTL19992000dem$rating, na.rm=TRUE)
+houseRTL19992000rep<- houseRTL %>% filter(year == 19992000 & party == "Republican")
+mean(houseRTL19992000rep$rating, na.rm=TRUE)
+
+houseRTL20012002dem<- houseRTL %>% filter(year == 20012002 &  party == "Democratic")
+mean(houseRTL20012002dem$rating, na.rm=TRUE)
+houseRTL20012002rep<- houseRTL %>% filter(year == 20012002 & party == "Republican")
+mean(houseRTL20012002rep$rating, na.rm=TRUE)
+
+houseRTL20032004dem<- houseRTL %>% filter(year == 20032004 &  party == "Democratic")
+mean(houseRTL20032004dem$rating, na.rm=TRUE)
+houseRTL20032004rep<- houseRTL %>% filter(year == 20032004 & party == "Republican")
+mean(houseRTL20032004rep$rating, na.rm=TRUE)
+
+houseRTL20052006dem<- houseRTL %>% filter(year == 20052006 &  party == "Democratic")
+mean(houseRTL20052006dem$rating, na.rm=TRUE)
+houseRTL20052006rep<- houseRTL %>% filter(year == 20052006 & party == "Republican")
+mean(houseRTL20052006rep$rating, na.rm=TRUE)
+
+houseRTL20072008dem<- houseRTL %>% filter(year == 20072008 &  party == "Democratic")
+mean(houseRTL20072008dem$rating, na.rm=TRUE)
+houseRTL20072008rep<- houseRTL %>% filter(year == 20072008 & party == "Republican")
+mean(houseRTL20072008rep$rating, na.rm=TRUE)
+
+houseRTL20092010dem<- houseRTL %>% filter(year == 20092010 &  party == "Democratic")
+mean(houseRTL20092010dem$rating, na.rm=TRUE)
+houseRTL20092010rep<- houseRTL %>% filter(year == 20092010 & party == "Republican")
+mean(houseRTL20092010rep$rating, na.rm=TRUE)
+
+houseRTL20112012dem<- houseRTL %>% filter(year == 20112012 &  party == "Democratic")
+mean(houseRTL20112012dem$rating, na.rm=TRUE)
+houseRTL20112012rep<- houseRTL %>% filter(year == 20112012 & party == "Republican")
+mean(houseRTL20112012rep$rating, na.rm=TRUE)
+
+houseRTL2013dem<- houseRTL %>% filter(year == 2013 &  party == "Democratic")
+mean(houseRTL2013dem$rating, na.rm=TRUE)
+houseRTL2013rep<- houseRTL %>% filter(year == 2013 & party == "Republican")
+mean(houseRTL2013rep$rating, na.rm=TRUE)
+
+houseRTL2014dem<- houseRTL %>% filter(year == 2014 &  party == "Democratic")
+mean(houseRTL2014dem$rating, na.rm=TRUE)
+houseRTL2014rep<- houseRTL %>% filter(year == 2014 & party == "Republican")
+mean(houseRTL2014rep$rating, na.rm=TRUE)
+
+houseRTL20152016dem<- houseRTL %>% filter(year == 20152016 &  party == "Democratic")
+mean(houseRTL20152016dem$rating, na.rm=TRUE)
+houseRTL20152016rep<- houseRTL %>% filter(year == 20152016 & party == "Republican")
+mean(houseRTL20152016rep$rating, na.rm=TRUE)
+
+houseRTL201720178dem<- houseRTL %>% filter(year == 201720178 &  party == "Democratic")
+mean(houseRTL201720178dem$rating, na.rm=TRUE)
+houseRTL201720178rep<- houseRTL %>% filter(year == 201720178 & party == "Republican")
+mean(houseRTL201720178rep$rating, na.rm=TRUE)
+
+houseRTL20192020dem<- houseRTL %>% filter(year == 20192020 &  party == "Democratic")
+mean(houseRTL20192020dem$rating, na.rm=TRUE)
+houseRTL20192020rep<- houseRTL %>% filter(year == 20192020 & party == "Republican")
+mean(houseRTL20192020rep$rating, na.rm=TRUE)
+```
+
+```{r senate RTL analysis}
+senateRTL$rating <- as.numeric(senateRTL$rating)
+senateRTL19971998dem<- senateRTL %>% filter(year == 19971998 &  party == "Democratic")
+mean(senateRTL19971998dem$rating, na.rm=TRUE)
+senateRTL19971998rep<- senateRTL %>% filter(year == 19971998 & party == "Republican")
+mean(senateRTL19971998rep$rating, na.rm=TRUE)
+
+senateRTL19992000dem<- senateRTL %>% filter(year == 19992000 &  party == "Democratic")
+mean(senateRTL19992000dem$rating, na.rm=TRUE)
+senateRTL19992000rep<- senateRTL %>% filter(year == 19992000 & party == "Republican")
+mean(senateRTL19992000rep$rating, na.rm=TRUE)
+
+senateRTL20012002dem<- senateRTL %>% filter(year == 20012002 &  party == "Democratic")
+mean(senateRTL20012002dem$rating, na.rm=TRUE)
+senateRTL20012002rep<- senateRTL %>% filter(year == 20012002 & party == "Republican")
+mean(senateRTL20012002rep$rating, na.rm=TRUE)
+
+senateRTL20032004dem<- senateRTL %>% filter(year == 20032004 &  party == "Democratic")
+mean(senateRTL20032004dem$rating, na.rm=TRUE)
+senateRTL20032004rep<- senateRTL %>% filter(year == 20032004 & party == "Republican")
+mean(senateRTL20032004rep$rating, na.rm=TRUE)
+
+senateRTL20052006dem<- senateRTL %>% filter(year == 20052006 &  party == "Democratic")
+mean(senateRTL20052006dem$rating, na.rm=TRUE)
+senateRTL20052006rep<- senateRTL %>% filter(year == 20052006 & party == "Republican")
+mean(senateRTL20052006rep$rating, na.rm=TRUE)
+
+senateRTL20072008dem<- senateRTL %>% filter(year == 20072008 &  party == "Democratic")
+mean(senateRTL20072008dem$rating, na.rm=TRUE)
+senateRTL20072008rep<- senateRTL %>% filter(year == 20072008 & party == "Republican")
+mean(senateRTL20072008rep$rating, na.rm=TRUE)
+
+senateRTL20092010dem<- senateRTL %>% filter(year == 20092010 &  party == "Democratic")
+mean(senateRTL20092010dem$rating, na.rm=TRUE)
+senateRTL20092010rep<- senateRTL %>% filter(year == 20092010 & party == "Republican")
+mean(senateRTL20092010rep$rating, na.rm=TRUE)
+
+senateRTL20112012dem<- senateRTL %>% filter(year == 20112012 &  party == "Democratic")
+mean(senateRTL20112012dem$rating, na.rm=TRUE)
+senateRTL20112012rep<- senateRTL %>% filter(year == 20112012 & party == "Republican")
+mean(senateRTL20112012rep$rating, na.rm=TRUE)
+
+senateRTL2013dem<- senateRTL %>% filter(year == 2013 &  party == "Democratic")
+mean(senateRTL2013dem$rating, na.rm=TRUE)
+senateRTL2013rep<- senateRTL %>% filter(year == 2013 & party == "Republican")
+mean(senateRTL2013rep$rating, na.rm=TRUE)
+
+senateRTL2014dem<- senateRTL %>% filter(year == 2014 &  party == "Democratic")
+mean(senateRTL2014dem$rating, na.rm=TRUE)
+senateRTL2014rep<- senateRTL %>% filter(year == 2014 & party == "Republican")
+mean(senateRTL2014rep$rating, na.rm=TRUE)
+
+senateRTL20152016dem<- senateRTL %>% filter(year == 20152016 &  party == "Democratic")
+mean(senateRTL20152016dem$rating, na.rm=TRUE)
+senateRTL20152016rep<- senateRTL %>% filter(year == 20152016 & party == "Republican")
+mean(senateRTL20152016rep$rating, na.rm=TRUE)
+
+senateRTL201720178dem<- senateRTL %>% filter(year == 201720178 &  party == "Democratic")
+mean(senateRTL201720178dem$rating, na.rm=TRUE)
+senateRTL201720178rep<- senateRTL %>% filter(year == 201720178 & party == "Republican")
+mean(senateRTL201720178rep$rating, na.rm=TRUE)
+
+senateRTL20192020dem<- senateRTL %>% filter(year == 20192020 &  party == "Democratic")
+mean(senateRTL20192020dem$rating, na.rm=TRUE)
+senateRTL20192020rep<- senateRTL %>% filter(year == 20192020 & party == "Republican")
+mean(senateRTL20192020rep$rating, na.rm=TRUE)
+```
+
+```{r PA manipulation}
+senatePA[c('rating', '%')] <- str_split_fixed(senatePA$rating, '%', 2)
+housePA[c('rating', '%')] <- str_split_fixed(housePA$rating, '%', 2)
+```
+
+```{r house PA analysis}
+housePA$rating <- as.numeric(housePA$rating)
+
+housePA1998dem<- housePA %>% filter(year == 1998 &  party == "Democratic")
+mean(housePA1998dem$rating, na.rm=TRUE)
+housePA1998rep<- housePA %>% filter(year == 1998 & party == "Republican")
+mean(housePA1998rep$rating, na.rm=TRUE)
+
+housePA1999dem<- housePA %>% filter(year == 1999 &  party == "Democratic")
+mean(housePA1999dem$rating, na.rm=TRUE)
+housePA1999rep<- housePA %>% filter(year == 1999 & party == "Republican")
+mean(housePA1999rep$rating, na.rm=TRUE)
+
+housePA2000dem<- housePA %>% filter(year == 2000 &  party == "Democratic")
+mean(housePA2000dem$rating, na.rm=TRUE)
+housePA2000rep<- housePA %>% filter(year == 2000 & party == "Republican")
+mean(housePA2000rep$rating, na.rm=TRUE)
+
+housePA2001dem<- housePA %>% filter(year == 2001 &  party == "Democratic")
+mean(housePA2001dem$rating, na.rm=TRUE)
+housePA2001rep<- housePA %>% filter(year == 2001 & party == "Republican")
+mean(housePA2001rep$rating, na.rm=TRUE)
+
+housePA2003dem<- housePA %>% filter(year == 2003 &  party == "Democratic")
+mean(housePA2003dem$rating, na.rm=TRUE)
+housePA2003rep<- housePA %>% filter(year == 2003 & party == "Republican")
+mean(housePA2003rep$rating, na.rm=TRUE)
+
+housePA2004dem<- housePA %>% filter(year == 2004 &  party == "Democratic")
+mean(housePA2004dem$rating, na.rm=TRUE)
+housePA2004rep<- housePA %>% filter(year == 2004 & party == "Republican")
+mean(housePA2004rep$rating, na.rm=TRUE)
+
+housePA2005dem<- housePA %>% filter(year == 2005 &  party == "Democratic")
+mean(housePA2005dem$rating, na.rm=TRUE)
+housePA2005rep<- housePA %>% filter(year == 2005 & party == "Republican")
+mean(housePA2005rep$rating, na.rm=TRUE)
+
+housePA2006dem<- housePA %>% filter(year == 2006 &  party == "Democratic")
+mean(housePA2006dem$rating, na.rm=TRUE)
+housePA2006rep<- housePA %>% filter(year == 2006 & party == "Republican")
+mean(housePA2006rep$rating, na.rm=TRUE)
+
+housePA2007dem<- housePA %>% filter(year == 2007 &  party == "Democratic")
+mean(housePA2007dem$rating, na.rm=TRUE)
+housePA2007rep<- housePA %>% filter(year == 2007 & party == "Republican")
+mean(housePA2007rep$rating, na.rm=TRUE)
+
+housePA2008dem<- housePA %>% filter(year == 2008 &  party == "Democratic")
+mean(housePA2008dem$rating, na.rm=TRUE)
+housePA2008rep<- housePA %>% filter(year == 2008 & party == "Republican")
+mean(housePA2008rep$rating, na.rm=TRUE)
+
+housePA2009dem<- housePA %>% filter(year == 2009 &  party == "Democratic")
+mean(housePA2009dem$rating, na.rm=TRUE)
+housePA2009rep<- housePA %>% filter(year == 2009 & party == "Republican")
+mean(housePA2009rep$rating, na.rm=TRUE)
+
+housePA2010dem<- housePA %>% filter(year == 2010 &  party == "Democratic")
+mean(housePA2010dem$rating, na.rm=TRUE)
+housePA2010rep<- housePA %>% filter(year == 2010 & party == "Republican")
+mean(housePA2010rep$rating, na.rm=TRUE)
+
+housePA2011dem<- housePA %>% filter(year == 2011 &  party == "Democratic")
+mean(housePA2011dem$rating, na.rm=TRUE)
+housePA2011rep<- housePA %>% filter(year == 2011 & party == "Republican")
+mean(housePA2011rep$rating, na.rm=TRUE)
+
+housePA2012dem<- housePA %>% filter(year == 2012 &  party == "Democratic")
+mean(housePA2012dem$rating, na.rm=TRUE)
+housePA2012rep<- housePA %>% filter(year == 2012 & party == "Republican")
+mean(housePA2012rep$rating, na.rm=TRUE)
+
+housePA2013dem<- housePA %>% filter(year == 2013 &  party == "Democratic")
+mean(housePA2013dem$rating, na.rm=TRUE)
+housePA2013rep<- housePA %>% filter(year == 2013 & party == "Republican")
+mean(housePA2013rep$rating, na.rm=TRUE)
+
+housePA2015dem<- housePA %>% filter(year == 2015 &  party == "Democratic")
+mean(housePA2015dem$rating, na.rm=TRUE)
+housePA2015rep<- housePA %>% filter(year == 2015 & party == "Republican")
+mean(housePA2015rep$rating, na.rm=TRUE)
+```
+
+```{r senate PA analysis}
+senatePA$rating <- as.numeric(senatePA$rating)
+
+senatePA1998dem<- senatePA %>% filter(year == 1998 &  party == "Democratic")
+mean(senatePA1998dem$rating, na.rm=TRUE)
+senatePA1998rep<- senatePA %>% filter(year == 1998 & party == "Republican")
+mean(senatePA1998rep$rating, na.rm=TRUE)
+
+senatePA1999dem<- senatePA %>% filter(year == 1999 &  party == "Democratic")
+mean(senatePA1999dem$rating, na.rm=TRUE)
+senatePA1999rep<- senatePA %>% filter(year == 1999 & party == "Republican")
+mean(senatePA1999rep$rating, na.rm=TRUE)
+
+senatePA2000dem<- senatePA %>% filter(year == 2000 &  party == "Democratic")
+mean(senatePA2000dem$rating, na.rm=TRUE)
+senatePA2000rep<- senatePA %>% filter(year == 2000 & party == "Republican")
+mean(senatePA2000rep$rating, na.rm=TRUE)
+
+senatePA2001dem<- senatePA %>% filter(year == 2001 &  party == "Democratic")
+mean(senatePA2001dem$rating, na.rm=TRUE)
+senatePA2001rep<- senatePA %>% filter(year == 2001 & party == "Republican")
+mean(senatePA2001rep$rating, na.rm=TRUE)
+
+senatePA2003dem<- senatePA %>% filter(year == 2003 &  party == "Democratic")
+mean(senatePA2003dem$rating, na.rm=TRUE)
+senatePA2003rep<- senatePA %>% filter(year == 2003 & party == "Republican")
+mean(senatePA2003rep$rating, na.rm=TRUE)
+
+senatePA2004dem<- senatePA %>% filter(year == 2004 &  party == "Democratic")
+mean(senatePA2004dem$rating, na.rm=TRUE)
+senatePA2004rep<- senatePA %>% filter(year == 2004 & party == "Republican")
+mean(senatePA2004rep$rating, na.rm=TRUE)
+
+senatePA2005dem<- senatePA %>% filter(year == 2005 &  party == "Democratic")
+mean(senatePA2005dem$rating, na.rm=TRUE)
+senatePA2005rep<- senatePA %>% filter(year == 2005 & party == "Republican")
+mean(senatePA2005rep$rating, na.rm=TRUE)
+
+senatePA2006dem<- senatePA %>% filter(year == 2006 &  party == "Democratic")
+mean(senatePA2006dem$rating, na.rm=TRUE)
+senatePA2006rep<- senatePA %>% filter(year == 2006 & party == "Republican")
+mean(senatePA2006rep$rating, na.rm=TRUE)
+
+senatePA2007dem<- senatePA %>% filter(year == 2007 &  party == "Democratic")
+mean(senatePA2007dem$rating, na.rm=TRUE)
+senatePA2007rep<- senatePA %>% filter(year == 2007 & party == "Republican")
+mean(senatePA2007rep$rating, na.rm=TRUE)
+
+senatePA2008dem<- senatePA %>% filter(year == 2008 &  party == "Democratic")
+mean(senatePA2008dem$rating, na.rm=TRUE)
+senatePA2008rep<- senatePA %>% filter(year == 2008 & party == "Republican")
+mean(senatePA2008rep$rating, na.rm=TRUE)
+
+senatePA2009dem<- senatePA %>% filter(year == 2009 &  party == "Democratic")
+mean(senatePA2009dem$rating, na.rm=TRUE)
+senatePA2009rep<- senatePA %>% filter(year == 2009 & party == "Republican")
+mean(senatePA2009rep$rating, na.rm=TRUE)
+
+senatePA2010dem<- senatePA %>% filter(year == 2010 &  party == "Democratic")
+mean(senatePA2010dem$rating, na.rm=TRUE)
+senatePA2010rep<- senatePA %>% filter(year == 2010 & party == "Republican")
+mean(senatePA2010rep$rating, na.rm=TRUE)
+
+senatePA2011dem<- senatePA %>% filter(year == 2011 &  party == "Democratic")
+mean(senatePA2011dem$rating, na.rm=TRUE)
+senatePA2011rep<- senatePA %>% filter(year == 2011 & party == "Republican")
+mean(senatePA2011rep$rating, na.rm=TRUE)
+
+senatePA2012dem<- senatePA %>% filter(year == 2012 &  party == "Democratic")
+mean(senatePA2012dem$rating, na.rm=TRUE)
+senatePA2012rep<- senatePA %>% filter(year == 2012 & party == "Republican")
+mean(senatePA2012rep$rating, na.rm=TRUE)
+
+senatePA2013dem<- senatePA %>% filter(year == 2013 &  party == "Democratic")
+mean(senatePA2013dem$rating, na.rm=TRUE)
+senatePA2013rep<- senatePA %>% filter(year == 2013 & party == "Republican")
+mean(senatePA2013rep$rating, na.rm=TRUE)
+
+senatePA2015dem<- senatePA %>% filter(year == 2015 &  party == "Democratic")
+mean(senatePA2015dem$rating, na.rm=TRUE)
+senatePA2015rep<- senatePA %>% filter(year == 2015 & party == "Republican")
+mean(senatePA2015rep$rating, na.rm=TRUE)
+```
+
+```{r CFLW manipulation}
+senateCFLW[c('rating', '%')] <- str_split_fixed(senateCFLW$rating, '%', 2)
+houseCFLW[c('rating', '%')] <- str_split_fixed(houseCFLW$rating, '%', 2)
+```
+
+```{r house CFLW analysis}
+houseCFLW$rating <- as.numeric(houseCFLW$rating)
+
+houseCFLW19992000dem<- houseCFLW %>% filter(year == 19992000 &  party == "Democratic")
+mean(houseCFLW19992000dem$rating, na.rm=TRUE)
+houseCFLW19992000rep<- houseCFLW %>% filter(year == 19992000 & party == "Republican")
+mean(houseCFLW19992000rep$rating, na.rm=TRUE)
+
+houseCFLW20012002dem<- houseCFLW %>% filter(year == 20012002 &  party == "Democratic")
+mean(houseCFLW20012002dem$rating, na.rm=TRUE)
+houseCFLW20012002rep<- houseCFLW %>% filter(year == 20012002 & party == "Republican")
+mean(houseCFLW20012002rep$rating, na.rm=TRUE)
+
+houseCFLW20032004dem<- houseCFLW %>% filter(year == 20032004 &  party == "Democratic")
+mean(houseCFLW20032004dem$rating, na.rm=TRUE)
+houseCFLW20032004rep<- houseCFLW %>% filter(year == 20032004 & party == "Republican")
+mean(houseCFLW20032004rep$rating, na.rm=TRUE)
+
+houseCFLW20052006dem<- houseCFLW %>% filter(year == 20052006 &  party == "Democratic")
+mean(houseCFLW20052006dem$rating, na.rm=TRUE)
+houseCFLW20052006rep<- houseCFLW %>% filter(year == 20052006 & party == "Republican")
+mean(houseCFLW20052006rep$rating, na.rm=TRUE)
+
+houseCFLW20072008dem<- houseCFLW %>% filter(year == 20072008 &  party == "Democratic")
+mean(houseCFLW20072008dem$rating, na.rm=TRUE)
+houseCFLW20072008rep<- houseCFLW %>% filter(year == 20072008 & party == "Republican")
+mean(houseCFLW20072008rep$rating, na.rm=TRUE)
+
+houseCFLW20092010dem<- houseCFLW %>% filter(year == 20092010 &  party == "Democratic")
+mean(houseCFLW20092010dem$rating, na.rm=TRUE)
+houseCFLW20092010rep<- houseCFLW %>% filter(year == 20092010 & party == "Republican")
+mean(houseCFLW20092010rep$rating, na.rm=TRUE)
+
+houseCFLW20112012dem<- houseCFLW %>% filter(year == 20112012 &  party == "Democratic")
+mean(houseCFLW20112012dem$rating, na.rm=TRUE)
+houseCFLW20112012rep<- houseCFLW %>% filter(year == 20112012 & party == "Republican")
+mean(houseCFLW20112012rep$rating, na.rm=TRUE)
+
+houseCFLW20132014dem<- houseCFLW %>% filter(year == 20132014 &  party == "Democratic")
+mean(houseCFLW20132014dem$rating, na.rm=TRUE)
+houseCFLW20132014rep<- houseCFLW %>% filter(year == 20132014 & party == "Republican")
+mean(houseCFLW20132014rep$rating, na.rm=TRUE)
+
+houseCFLW20152016dem<- houseCFLW %>% filter(year == 20152016 &  party == "Democratic")
+mean(houseCFLW20152016dem$rating, na.rm=TRUE)
+houseCFLW20152016rep<- houseCFLW %>% filter(year == 20152016 & party == "Republican")
+mean(houseCFLW20152016rep$rating, na.rm=TRUE)
+```
+
+```{r senate CFLW analysis}
+senateCFLW$rating <- as.numeric(senateCFLW$rating)
+
+senateCFLW19992000dem<- senateCFLW %>% filter(year == 19992000 &  party == "Democratic")
+mean(senateCFLW19992000dem$rating, na.rm=TRUE)
+senateCFLW19992000rep<- senateCFLW %>% filter(year == 19992000 & party == "Republican")
+mean(senateCFLW19992000rep$rating, na.rm=TRUE)
+
+senateCFLW20012002dem<- senateCFLW %>% filter(year == 20012002 &  party == "Democratic")
+mean(senateCFLW20012002dem$rating, na.rm=TRUE)
+senateCFLW20012002rep<- senateCFLW %>% filter(year == 20012002 & party == "Republican")
+mean(senateCFLW20012002rep$rating, na.rm=TRUE)
+
+senateCFLW20032004dem<- senateCFLW %>% filter(year == 20032004 &  party == "Democratic")
+mean(senateCFLW20032004dem$rating, na.rm=TRUE)
+senateCFLW20032004rep<- senateCFLW %>% filter(year == 20032004 & party == "Republican")
+mean(senateCFLW20032004rep$rating, na.rm=TRUE)
+
+senateCFLW20052006dem<- senateCFLW %>% filter(year == 20052006 &  party == "Democratic")
+mean(senateCFLW20052006dem$rating, na.rm=TRUE)
+senateCFLW20052006rep<- senateCFLW %>% filter(year == 20052006 & party == "Republican")
+mean(senateCFLW20052006rep$rating, na.rm=TRUE)
+
+senateCFLW20072008dem<- senateCFLW %>% filter(year == 20072008 &  party == "Democratic")
+mean(senateCFLW20072008dem$rating, na.rm=TRUE)
+senateCFLW20072008rep<- senateCFLW %>% filter(year == 20072008 & party == "Republican")
+mean(senateCFLW20072008rep$rating, na.rm=TRUE)
+
+senateCFLW20092010dem<- senateCFLW %>% filter(year == 20092010 &  party == "Democratic")
+mean(senateCFLW20092010dem$rating, na.rm=TRUE)
+senateCFLW20092010rep<- senateCFLW %>% filter(year == 20092010 & party == "Republican")
+mean(senateCFLW20092010rep$rating, na.rm=TRUE)
+
+senateCFLW20112012dem<- senateCFLW %>% filter(year == 20112012 &  party == "Democratic")
+mean(senateCFLW20112012dem$rating, na.rm=TRUE)
+senateCFLW20112012rep<- senateCFLW %>% filter(year == 20112012 & party == "Republican")
+mean(senateCFLW20112012rep$rating, na.rm=TRUE)
+
+senateCFLW20132014dem<- senateCFLW %>% filter(year == 20132014 &  party == "Democratic")
+mean(senateCFLW20132014dem$rating, na.rm=TRUE)
+senateCFLW20132014rep<- senateCFLW %>% filter(year == 20132014 & party == "Republican")
+mean(senateCFLW20132014rep$rating, na.rm=TRUE)
+
+senateCFLW20152016dem<- senateCFLW %>% filter(year == 20152016 &  party == "Democratic")
+mean(senateCFLW20152016dem$rating, na.rm=TRUE)
+senateCFLW20152016rep<- senateCFLW %>% filter(year == 20152016 & party == "Republican")
+mean(senateCFLW20152016rep$rating, na.rm=TRUE)
+```
+
+```{r APHA manipulation}
+senateAPHA[c('rating', '%')] <- str_split_fixed(senateAPHA$rating, '%', 2)
+houseAPHA[c('rating', '%')] <- str_split_fixed(houseAPHA$rating, '%', 2)
+```
+
+```{r house APHA analysis}
+houseAPHA$rating <- as.numeric(houseAPHA$rating)
+houseAPHA1997dem<- houseAPHA %>% filter(year == 1997 &  party == "Democratic")
+mean(houseAPHA1997dem$rating, na.rm=TRUE)
+houseAPHA1997rep<- houseAPHA %>% filter(year == 1997 & party == "Republican")
+mean(houseAPHA1997rep$rating, na.rm=TRUE)
+
+houseAPHA1998dem<- houseAPHA %>% filter(year == 1998 &  party == "Democratic")
+mean(houseAPHA1998dem$rating, na.rm=TRUE)
+houseAPHA1998rep<- houseAPHA %>% filter(year == 1998 & party == "Republican")
+mean(houseAPHA1998rep$rating, na.rm=TRUE)
+
+houseAPHA1999dem<- houseAPHA %>% filter(year == 1999 &  party == "Democratic")
+mean(houseAPHA1999dem$rating, na.rm=TRUE)
+houseAPHA1999rep<- houseAPHA %>% filter(year == 1999 & party == "Republican")
+mean(houseAPHA1999rep$rating, na.rm=TRUE)
+
+houseAPHA2000dem<- houseAPHA %>% filter(year == 2000 &  party == "Democratic")
+mean(houseAPHA2000dem$rating, na.rm=TRUE)
+houseAPHA2000rep<- houseAPHA %>% filter(year == 2000 & party == "Republican")
+mean(houseAPHA2000rep$rating, na.rm=TRUE)
+
+houseAPHA2001dem<- houseAPHA %>% filter(year == 2001 &  party == "Democratic")
+mean(houseAPHA2001dem$rating, na.rm=TRUE)
+houseAPHA2001rep<- houseAPHA %>% filter(year == 2001 & party == "Republican")
+mean(houseAPHA2001rep$rating, na.rm=TRUE)
+
+houseAPHA2002dem<- houseAPHA %>% filter(year == 2002 &  party == "Democratic")
+mean(houseAPHA2002dem$rating, na.rm=TRUE)
+houseAPHA2002rep<- houseAPHA %>% filter(year == 2002 & party == "Republican")
+mean(houseAPHA2002rep$rating, na.rm=TRUE)
+
+houseAPHA2003dem<- houseAPHA %>% filter(year == 2003 &  party == "Democratic")
+mean(houseAPHA2003dem$rating, na.rm=TRUE)
+houseAPHA2003rep<- houseAPHA %>% filter(year == 2003 & party == "Republican")
+mean(houseAPHA2003rep$rating, na.rm=TRUE)
+
+houseAPHA2004dem<- houseAPHA %>% filter(year == 2004 &  party == "Democratic")
+mean(houseAPHA2004dem$rating, na.rm=TRUE)
+houseAPHA2004rep<- houseAPHA %>% filter(year == 2004 & party == "Republican")
+mean(houseAPHA2004rep$rating, na.rm=TRUE)
+
+houseAPHA2005dem<- houseAPHA %>% filter(year == 2005 &  party == "Democratic")
+mean(houseAPHA2005dem$rating, na.rm=TRUE)
+houseAPHA2005rep<- houseAPHA %>% filter(year == 2005 & party == "Republican")
+mean(houseAPHA2005rep$rating, na.rm=TRUE)
+
+houseAPHA2006dem<- houseAPHA %>% filter(year == 2006 &  party == "Democratic")
+mean(houseAPHA2006dem$rating, na.rm=TRUE)
+houseAPHA2006rep<- houseAPHA %>% filter(year == 2006 & party == "Republican")
+mean(houseAPHA2006rep$rating, na.rm=TRUE)
+
+houseAPHA2007dem<- houseAPHA %>% filter(year == 2007 &  party == "Democratic")
+mean(houseAPHA2007dem$rating, na.rm=TRUE)
+houseAPHA2007rep<- houseAPHA %>% filter(year == 2007 & party == "Republican")
+mean(houseAPHA2007rep$rating, na.rm=TRUE)
+
+houseAPHA2008dem<- houseAPHA %>% filter(year == 2008 &  party == "Democratic")
+mean(houseAPHA2008dem$rating, na.rm=TRUE)
+houseAPHA2008rep<- houseAPHA %>% filter(year == 2008 & party == "Republican")
+mean(houseAPHA2008rep$rating, na.rm=TRUE)
+
+houseAPHA2009dem<- houseAPHA %>% filter(year == 2009 &  party == "Democratic")
+mean(houseAPHA2009dem$rating, na.rm=TRUE)
+houseAPHA2009rep<- houseAPHA %>% filter(year == 2009 & party == "Republican")
+mean(houseAPHA2009rep$rating, na.rm=TRUE)
+
+houseAPHA2010dem<- houseAPHA %>% filter(year == 2010 &  party == "Democratic")
+mean(houseAPHA2010dem$rating, na.rm=TRUE)
+houseAPHA2010rep<- houseAPHA %>% filter(year == 2010 & party == "Republican")
+mean(houseAPHA2010rep$rating, na.rm=TRUE)
+
+houseAPHA2013dem<- houseAPHA %>% filter(year == 2013 &  party == "Democratic")
+mean(houseAPHA2013dem$rating, na.rm=TRUE)
+houseAPHA2013rep<- houseAPHA %>% filter(year == 2013 & party == "Republican")
+mean(houseAPHA2013rep$rating, na.rm=TRUE)
+
+houseAPHA2015dem<- houseAPHA %>% filter(year == 2015 &  party == "Democratic")
+mean(houseAPHA2015dem$rating, na.rm=TRUE)
+houseAPHA2015rep<- houseAPHA %>% filter(year == 2015 & party == "Republican")
+mean(houseAPHA2015rep$rating, na.rm=TRUE)
+
+houseAPHA2016dem<- houseAPHA %>% filter(year == 2016 &  party == "Democratic")
+mean(houseAPHA2016dem$rating, na.rm=TRUE)
+houseAPHA2016rep<- houseAPHA %>% filter(year == 2016 & party == "Republican")
+mean(houseAPHA2016rep$rating, na.rm=TRUE)
+
+houseAPHA2017dem<- houseAPHA %>% filter(year == 2017 &  party == "Democratic")
+mean(houseAPHA2017dem$rating, na.rm=TRUE)
+houseAPHA2017rep<- houseAPHA %>% filter(year == 2017 & party == "Republican")
+mean(houseAPHA2017rep$rating, na.rm=TRUE)
+```
+
+```{r senate APHA analysis}
+senateAPHA$rating <- as.numeric(senateAPHA$rating)
+senateAPHA1997dem<- senateAPHA %>% filter(year == 1997 &  party == "Democratic")
+mean(senateAPHA1997dem$rating, na.rm=TRUE)
+senateAPHA1997rep<- senateAPHA %>% filter(year == 1997 & party == "Republican")
+mean(senateAPHA1997rep$rating, na.rm=TRUE)
+
+senateAPHA1998dem<- senateAPHA %>% filter(year == 1998 &  party == "Democratic")
+mean(senateAPHA1998dem$rating, na.rm=TRUE)
+senateAPHA1998rep<- senateAPHA %>% filter(year == 1998 & party == "Republican")
+mean(senateAPHA1998rep$rating, na.rm=TRUE)
+
+senateAPHA1999dem<- senateAPHA %>% filter(year == 1999 &  party == "Democratic")
+mean(senateAPHA1999dem$rating, na.rm=TRUE)
+senateAPHA1999rep<- senateAPHA %>% filter(year == 1999 & party == "Republican")
+mean(senateAPHA1999rep$rating, na.rm=TRUE)
+
+senateAPHA2000dem<- senateAPHA %>% filter(year == 2000 &  party == "Democratic")
+mean(senateAPHA2000dem$rating, na.rm=TRUE)
+senateAPHA2000rep<- senateAPHA %>% filter(year == 2000 & party == "Republican")
+mean(senateAPHA2000rep$rating, na.rm=TRUE)
+
+senateAPHA2001dem<- senateAPHA %>% filter(year == 2001 &  party == "Democratic")
+mean(senateAPHA2001dem$rating, na.rm=TRUE)
+senateAPHA2001rep<- senateAPHA %>% filter(year == 2001 & party == "Republican")
+mean(senateAPHA2001rep$rating, na.rm=TRUE)
+
+senateAPHA2002dem<- senateAPHA %>% filter(year == 2002 &  party == "Democratic")
+mean(senateAPHA2002dem$rating, na.rm=TRUE)
+senateAPHA2002rep<- senateAPHA %>% filter(year == 2002 & party == "Republican")
+mean(senateAPHA2002rep$rating, na.rm=TRUE)
+
+senateAPHA2003dem<- senateAPHA %>% filter(year == 2003 &  party == "Democratic")
+mean(senateAPHA2003dem$rating, na.rm=TRUE)
+senateAPHA2003rep<- senateAPHA %>% filter(year == 2003 & party == "Republican")
+mean(senateAPHA2003rep$rating, na.rm=TRUE)
+
+senateAPHA2004dem<- senateAPHA %>% filter(year == 2004 &  party == "Democratic")
+mean(senateAPHA2004dem$rating, na.rm=TRUE)
+senateAPHA2004rep<- senateAPHA %>% filter(year == 2004 & party == "Republican")
+mean(senateAPHA2004rep$rating, na.rm=TRUE)
+
+senateAPHA2005dem<- senateAPHA %>% filter(year == 2005 &  party == "Democratic")
+mean(senateAPHA2005dem$rating, na.rm=TRUE)
+senateAPHA2005rep<- senateAPHA %>% filter(year == 2005 & party == "Republican")
+mean(senateAPHA2005rep$rating, na.rm=TRUE)
+
+senateAPHA2006dem<- senateAPHA %>% filter(year == 2006 &  party == "Democratic")
+mean(senateAPHA2006dem$rating, na.rm=TRUE)
+senateAPHA2006rep<- senateAPHA %>% filter(year == 2006 & party == "Republican")
+mean(senateAPHA2006rep$rating, na.rm=TRUE)
+
+senateAPHA2007dem<- senateAPHA %>% filter(year == 2007 &  party == "Democratic")
+mean(senateAPHA2007dem$rating, na.rm=TRUE)
+senateAPHA2007rep<- senateAPHA %>% filter(year == 2007 & party == "Republican")
+mean(senateAPHA2007rep$rating, na.rm=TRUE)
+
+senateAPHA2008dem<- senateAPHA %>% filter(year == 2008 &  party == "Democratic")
+mean(senateAPHA2008dem$rating, na.rm=TRUE)
+senateAPHA2008rep<- senateAPHA %>% filter(year == 2008 & party == "Republican")
+mean(senateAPHA2008rep$rating, na.rm=TRUE)
+
+senateAPHA2009dem<- senateAPHA %>% filter(year == 2009 &  party == "Democratic")
+mean(senateAPHA2009dem$rating, na.rm=TRUE)
+senateAPHA2009rep<- senateAPHA %>% filter(year == 2009 & party == "Republican")
+mean(senateAPHA2009rep$rating, na.rm=TRUE)
+
+senateAPHA2010dem<- senateAPHA %>% filter(year == 2010 &  party == "Democratic")
+mean(senateAPHA2010dem$rating, na.rm=TRUE)
+senateAPHA2010rep<- senateAPHA %>% filter(year == 2010 & party == "Republican")
+mean(senateAPHA2010rep$rating, na.rm=TRUE)
+
+senateAPHA2013dem<- senateAPHA %>% filter(year == 2013 &  party == "Democratic")
+mean(senateAPHA2013dem$rating, na.rm=TRUE)
+senateAPHA2013rep<- senateAPHA %>% filter(year == 2013 & party == "Republican")
+mean(senateAPHA2013rep$rating, na.rm=TRUE)
+
+senateAPHA2015dem<- senateAPHA %>% filter(year == 2015 &  party == "Democratic")
+mean(senateAPHA2015dem$rating, na.rm=TRUE)
+senateAPHA2015rep<- senateAPHA %>% filter(year == 2015 & party == "Republican")
+mean(senateAPHA2015rep$rating, na.rm=TRUE)
+
+senateAPHA2016dem<- senateAPHA %>% filter(year == 2016 &  party == "Democratic")
+mean(senateAPHA2016dem$rating, na.rm=TRUE)
+senateAPHA2016rep<- senateAPHA %>% filter(year == 2016 & party == "Republican")
+mean(senateAPHA2016rep$rating, na.rm=TRUE)
+
+senateAPHA2017dem<- senateAPHA %>% filter(year == 2017 &  party == "Democratic")
+mean(senateAPHA2017dem$rating, na.rm=TRUE)
+senateAPHA2017rep<- senateAPHA %>% filter(year == 2017 & party == "Republican")
+mean(senateAPHA2017rep$rating, na.rm=TRUE)
+```
+
+```{r NTU manipulation}
+senateNTU[c('rating', '%')] <- str_split_fixed(senateNTU$rating, '%', 2)
+houseNTU[c('rating', '%')] <- str_split_fixed(houseNTU$rating, '%', 2)
+```
+
+```{r house NTU analysis}
+houseNTU$rating <- as.numeric(houseNTU$rating)
+houseNTU1997dem<- houseNTU %>% filter(year == 1997 &  party == "Democratic")
+mean(houseNTU1997dem$rating, na.rm=TRUE)
+houseNTU1997rep<- houseNTU %>% filter(year == 1997 & party == "Republican")
+mean(houseNTU1997rep$rating, na.rm=TRUE)
+
+houseNTU1998dem<- houseNTU %>% filter(year == 1998 &  party == "Democratic")
+mean(houseNTU1998dem$rating, na.rm=TRUE)
+houseNTU1998rep<- houseNTU %>% filter(year == 1998 & party == "Republican")
+mean(houseNTU1998rep$rating, na.rm=TRUE)
+
+houseNTU1999dem<- houseNTU %>% filter(year == 1999 &  party == "Democratic")
+mean(houseNTU1999dem$rating, na.rm=TRUE)
+houseNTU1999rep<- houseNTU %>% filter(year == 1999 & party == "Republican")
+mean(houseNTU1999rep$rating, na.rm=TRUE)
+
+houseNTU2001dem<- houseNTU %>% filter(year == 2001 &  party == "Democratic")
+mean(houseNTU2001dem$rating, na.rm=TRUE)
+houseNTU2001rep<- houseNTU %>% filter(year == 2001 & party == "Republican")
+mean(houseNTU2001rep$rating, na.rm=TRUE)
+
+houseNTU2002dem<- houseNTU %>% filter(year == 2002 &  party == "Democratic")
+mean(houseNTU2002dem$rating, na.rm=TRUE)
+houseNTU2002rep<- houseNTU %>% filter(year == 2002 & party == "Republican")
+mean(houseNTU2002rep$rating, na.rm=TRUE)
+
+houseNTU2003dem<- houseNTU %>% filter(year == 2003 &  party == "Democratic")
+mean(houseNTU2003dem$rating, na.rm=TRUE)
+houseNTU2003rep<- houseNTU %>% filter(year == 2003 & party == "Republican")
+mean(houseNTU2003rep$rating, na.rm=TRUE)
+
+houseNTU2004dem<- houseNTU %>% filter(year == 2004 &  party == "Democratic")
+mean(houseNTU2004dem$rating, na.rm=TRUE)
+houseNTU2004rep<- houseNTU %>% filter(year == 2004 & party == "Republican")
+mean(houseNTU2004rep$rating, na.rm=TRUE)
+
+houseNTU2005dem<- houseNTU %>% filter(year == 2005 &  party == "Democratic")
+mean(houseNTU2005dem$rating, na.rm=TRUE)
+houseNTU2005rep<- houseNTU %>% filter(year == 2005 & party == "Republican")
+mean(houseNTU2005rep$rating, na.rm=TRUE)
+
+houseNTU2006dem<- houseNTU %>% filter(year == 2006 &  party == "Democratic")
+mean(houseNTU2006dem$rating, na.rm=TRUE)
+houseNTU2006rep<- houseNTU %>% filter(year == 2006 & party == "Republican")
+mean(houseNTU2006rep$rating, na.rm=TRUE)
+
+houseNTU2009dem<- houseNTU %>% filter(year == 2009 &  party == "Democratic")
+mean(houseNTU2009dem$rating, na.rm=TRUE)
+houseNTU2009rep<- houseNTU %>% filter(year == 2009 & party == "Republican")
+mean(houseNTU2009rep$rating, na.rm=TRUE)
+
+houseNTU2010dem<- houseNTU %>% filter(year == 2010 &  party == "Democratic")
+mean(houseNTU2010dem$rating, na.rm=TRUE)
+houseNTU2010rep<- houseNTU %>% filter(year == 2010 & party == "Republican")
+mean(houseNTU2010rep$rating, na.rm=TRUE)
+
+houseNTU2011dem<- houseNTU %>% filter(year == 2011 &  party == "Democratic")
+mean(houseNTU2011dem$rating, na.rm=TRUE)
+houseNTU2011rep<- houseNTU %>% filter(year == 2011 & party == "Republican")
+mean(houseNTU2011rep$rating, na.rm=TRUE)
+
+houseNTU2013dem<- houseNTU %>% filter(year == 2013 &  party == "Democratic")
+mean(houseNTU2013dem$rating, na.rm=TRUE)
+houseNTU2013rep<- houseNTU %>% filter(year == 2013 & party == "Republican")
+mean(houseNTU2013rep$rating, na.rm=TRUE)
+
+houseNTU2015dem<- houseNTU %>% filter(year == 2015 &  party == "Democratic")
+mean(houseNTU2015dem$rating, na.rm=TRUE)
+houseNTU2015rep<- houseNTU %>% filter(year == 2015 & party == "Republican")
+mean(houseNTU2015rep$rating, na.rm=TRUE)
+
+houseNTU2016dem<- houseNTU %>% filter(year == 2016 &  party == "Democratic")
+mean(houseNTU2016dem$rating, na.rm=TRUE)
+houseNTU2016rep<- houseNTU %>% filter(year == 2016 & party == "Republican")
+mean(houseNTU2016rep$rating, na.rm=TRUE)
+
+houseNTU2018dem<- houseNTU %>% filter(year == 2018 &  party == "Democratic")
+mean(houseNTU2018dem$rating, na.rm=TRUE)
+houseNTU2018rep<- houseNTU %>% filter(year == 2018 & party == "Republican")
+mean(houseNTU2018rep$rating, na.rm=TRUE)
+
+houseNTU2019dem<- houseNTU %>% filter(year == 2019 &  party == "Democratic")
+mean(houseNTU2019dem$rating, na.rm=TRUE)
+houseNTU2019rep<- houseNTU %>% filter(year == 2019 & party == "Republican")
+mean(houseNTU2019rep$rating, na.rm=TRUE)
+
+houseNTU2020dem<- houseNTU %>% filter(year == 2020 &  party == "Democratic")
+mean(houseNTU2020dem$rating, na.rm=TRUE)
+houseNTU2020rep<- houseNTU %>% filter(year == 2020 & party == "Republican")
+mean(houseNTU2020rep$rating, na.rm=TRUE)
+```
+
+```{r senate NTU analysis}
+senateNTU$rating <- as.numeric(senateNTU$rating)
+senateNTU1997dem<- senateNTU %>% filter(year == 1997 &  party == "Democratic")
+mean(senateNTU1997dem$rating, na.rm=TRUE)
+senateNTU1997rep<- senateNTU %>% filter(year == 1997 & party == "Republican")
+mean(senateNTU1997rep$rating, na.rm=TRUE)
+
+senateNTU1998dem<- senateNTU %>% filter(year == 1998 &  party == "Democratic")
+mean(senateNTU1998dem$rating, na.rm=TRUE)
+senateNTU1998rep<- senateNTU %>% filter(year == 1998 & party == "Republican")
+mean(senateNTU1998rep$rating, na.rm=TRUE)
+
+senateNTU1999dem<- senateNTU %>% filter(year == 1999 &  party == "Democratic")
+mean(senateNTU1999dem$rating, na.rm=TRUE)
+senateNTU1999rep<- senateNTU %>% filter(year == 1999 & party == "Republican")
+mean(senateNTU1999rep$rating, na.rm=TRUE)
+
+senateNTU2001dem<- senateNTU %>% filter(year == 2001 &  party == "Democratic")
+mean(senateNTU2001dem$rating, na.rm=TRUE)
+senateNTU2001rep<- senateNTU %>% filter(year == 2001 & party == "Republican")
+mean(senateNTU2001rep$rating, na.rm=TRUE)
+
+senateNTU2002dem<- senateNTU %>% filter(year == 2002 &  party == "Democratic")
+mean(senateNTU2002dem$rating, na.rm=TRUE)
+senateNTU2002rep<- senateNTU %>% filter(year == 2002 & party == "Republican")
+mean(senateNTU2002rep$rating, na.rm=TRUE)
+
+senateNTU2003dem<- senateNTU %>% filter(year == 2003 &  party == "Democratic")
+mean(senateNTU2003dem$rating, na.rm=TRUE)
+senateNTU2003rep<- senateNTU %>% filter(year == 2003 & party == "Republican")
+mean(senateNTU2003rep$rating, na.rm=TRUE)
+
+senateNTU2004dem<- senateNTU %>% filter(year == 2004 &  party == "Democratic")
+mean(senateNTU2004dem$rating, na.rm=TRUE)
+senateNTU2004rep<- senateNTU %>% filter(year == 2004 & party == "Republican")
+mean(senateNTU2004rep$rating, na.rm=TRUE)
+
+senateNTU2005dem<- senateNTU %>% filter(year == 2005 &  party == "Democratic")
+mean(senateNTU2005dem$rating, na.rm=TRUE)
+senateNTU2005rep<- senateNTU %>% filter(year == 2005 & party == "Republican")
+mean(senateNTU2005rep$rating, na.rm=TRUE)
+
+senateNTU2006dem<- senateNTU %>% filter(year == 2006 &  party == "Democratic")
+mean(senateNTU2006dem$rating, na.rm=TRUE)
+senateNTU2006rep<- senateNTU %>% filter(year == 2006 & party == "Republican")
+mean(senateNTU2006rep$rating, na.rm=TRUE)
+
+senateNTU2009dem<- senateNTU %>% filter(year == 2009 &  party == "Democratic")
+mean(senateNTU2009dem$rating, na.rm=TRUE)
+senateNTU2009rep<- senateNTU %>% filter(year == 2009 & party == "Republican")
+mean(senateNTU2009rep$rating, na.rm=TRUE)
+
+senateNTU2010dem<- senateNTU %>% filter(year == 2010 &  party == "Democratic")
+mean(senateNTU2010dem$rating, na.rm=TRUE)
+senateNTU2010rep<- senateNTU %>% filter(year == 2010 & party == "Republican")
+mean(senateNTU2010rep$rating, na.rm=TRUE)
+
+senateNTU2011dem<- senateNTU %>% filter(year == 2011 &  party == "Democratic")
+mean(senateNTU2011dem$rating, na.rm=TRUE)
+senateNTU2011rep<- senateNTU %>% filter(year == 2011 & party == "Republican")
+mean(senateNTU2011rep$rating, na.rm=TRUE)
+
+senateNTU2013dem<- senateNTU %>% filter(year == 2013 &  party == "Democratic")
+mean(senateNTU2013dem$rating, na.rm=TRUE)
+senateNTU2013rep<- senateNTU %>% filter(year == 2013 & party == "Republican")
+mean(senateNTU2013rep$rating, na.rm=TRUE)
+
+senateNTU2015dem<- senateNTU %>% filter(year == 2015 &  party == "Democratic")
+mean(senateNTU2015dem$rating, na.rm=TRUE)
+senateNTU2015rep<- senateNTU %>% filter(year == 2015 & party == "Republican")
+mean(senateNTU2015rep$rating, na.rm=TRUE)
+
+senateNTU2016dem<- senateNTU %>% filter(year == 2016 &  party == "Democratic")
+mean(senateNTU2016dem$rating, na.rm=TRUE)
+senateNTU2016rep<- senateNTU %>% filter(year == 2016 & party == "Republican")
+mean(senateNTU2016rep$rating, na.rm=TRUE)
+
+senateNTU2018dem<- senateNTU %>% filter(year == 2018 &  party == "Democratic")
+mean(senateNTU2018dem$rating, na.rm=TRUE)
+senateNTU2018rep<- senateNTU %>% filter(year == 2018 & party == "Republican")
+mean(senateNTU2018rep$rating, na.rm=TRUE)
+
+senateNTU2019dem<- senateNTU %>% filter(year == 2019 &  party == "Democratic")
+mean(senateNTU2019dem$rating, na.rm=TRUE)
+senateNTU2019rep<- senateNTU %>% filter(year == 2019 & party == "Republican")
+mean(senateNTU2019rep$rating, na.rm=TRUE)
+
+senateNTU2020dem<- senateNTU %>% filter(year == 2020 &  party == "Democratic")
+mean(senateNTU2020dem$rating, na.rm=TRUE)
+senateNTU2020rep<- senateNTU %>% filter(year == 2020 & party == "Republican")
+mean(senateNTU2020rep$rating, na.rm=TRUE)
+```
